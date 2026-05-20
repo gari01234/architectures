@@ -999,15 +999,33 @@ function rebuildSceneColours(){
 
     // Semilla entera derivada de la fecha (estable, determinista).
     // Concatena AAAAMMDD y aplica FNV-1a + avalanche para mezclar.
-    function seedFromDate(date) {
-      const y = date.getFullYear();
-      const m = date.getMonth() + 1;
+    // hashString: FNV-1a 32-bit. IDÉNTICA a la de Poems/Words/Letters,
+    // para que las cuatro piezas compartan literalmente la misma
+    // semilla raíz para una fecha dada (misma nota fundamental).
+    function hashString(str) {
+      let h = 2166136261 >>> 0;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    // Cadena-semilla en el formato común del sistema: "MAY.16.2026"
+    // (mes abreviado, día sin cero a la izquierda, año). Idéntico a
+    // formatDateSeed de las otras piezas (MONTH_ABBR == MONTH_NAMES).
+    function formatDateSeed(date) {
+      const m = MONTH_ABBR[date.getMonth()];
       const d = date.getDate();
-      let h = 0x811c9dc5;
-      h = fnv1a32(h, y);
-      h = fnv1a32(h, m);
-      h = fnv1a32(h, d);
-      return avalanche32(h);
+      const y = date.getFullYear();
+      return m + "." + d + "." + y;
+    }
+
+    // Semilla raíz del ciclo. Ahora deriva EXACTAMENTE igual que las
+    // demás piezas Dear: hashString(formatDateSeed(date)). Así, una
+    // misma fecha produce la misma semilla raíz en las cuatro obras.
+    function seedFromDate(date) {
+      return hashString(formatDateSeed(date));
     }
 
     // Mulberry32: RNG determinista de 32 bits.
