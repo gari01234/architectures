@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <title>PRMTTN</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- iOS: al guardar en la pantalla de inicio, abrir sin barra de
+       Safari (modo app, pantalla completa real). En iPad/iPhone esta
+       es la vía fiable de pantalla completa, ya que Safari restringe
+       la Fullscreen API estándar. -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
   <!-- Three .js + OrbitControls (una sola vez) -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -49,7 +56,7 @@
     position:fixed;
     z-index:260;
     right:10px;
-    bottom:10px;
+    bottom:48px;
     border:none;
     border-radius:4px;
     padding:8px 12px;
@@ -63,6 +70,30 @@
     transition:background .2s;
   }
   #permNextButton:hover{
+    background:rgba(255,255,255,0.20);
+  }
+ 
+  /* Botón de pantalla completa: mismo lenguaje visual que el 120,
+     visible siempre, anclado abajo-derecha. El botón 120 (efímero,
+     solo con UI oculta) se coloca encima de él. */
+  #fullscreenButton{
+    position:fixed;
+    z-index:260;
+    right:10px;
+    bottom:10px;
+    border:none;
+    border-radius:4px;
+    padding:8px 12px;
+    font-family: Futura, "Futura PT", "Century Gothic", "Avenir Next", Avenir, sans-serif;
+    font-weight: 400;
+    font-size:12px;
+    letter-spacing: 0.06em;
+    background:rgba(255,255,255,0.12);
+    color:inherit;
+    cursor:none;
+    transition:background .2s;
+  }
+  #fullscreenButton:hover{
     background:rgba(255,255,255,0.20);
   }
  
@@ -179,6 +210,7 @@
  
   <!-- Botón 120: recorre los 120 fenotipos (reorganizaciones de
        atributos) de la misma arquitectura genotípica del día. -->
+  <button id="fullscreenButton" onclick="toggleFullscreen()">⛶</button>
   <button id="permNextButton" onclick="nextPerm120()">120</button>
  
   <input type="file" id="json-upload" accept=".json" style="display:none;" />
@@ -1146,6 +1178,16 @@ function rebuildSceneColours(){
         attrSel.value = `${mapping[0]},${mapping[1]},${mapping[2]},${mapping[3]},${mapping[4]}`;
       }
  
+      // Resetear el recorrido de las 120 vistas: la escena nace en la
+      // reorganización identidad (perm120List[0] === [0,1,2,3,4]), así
+      // que el contador debe volver a 0. Si no, tras haber avanzado con
+      // el botón "120" en una escena anterior, el índice quedaría
+      // desincronizado: la vista arrancaría en identidad pero el
+      // siguiente clic saltaría desde el índice viejo en vez de pasar
+      // de 0 a 1.
+      perm120Index = 0;
+      if (typeof updatePerm120Status === 'function') updatePerm120Status();
+ 
       refreshAll({rebuild: true});
  
       // Actualizar HUD y document.title con la fecha del ciclo activo
@@ -1427,6 +1469,29 @@ function applyPerm120Index(i){
 }
  
 function nextPerm120(){ applyPerm120Index(perm120Index + 1); }
+ 
+// Pantalla completa. Usa la Fullscreen API estándar con respaldo
+// webkit (Safari de escritorio). Nota: en iPad/iPhone Safari esta API
+// está restringida por Apple y puede no ocultar la barra; en esos
+// dispositivos la vía fiable es "Añadir a pantalla de inicio" (ver
+// meta tags apple-mobile-web-app-capable en el <head>).
+function toggleFullscreen(){
+  const doc = document;
+  const el = doc.documentElement;
+  const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
+  try {
+    if (!isFs) {
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } else {
+      if (doc.exitFullscreen) doc.exitFullscreen();
+      else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+    }
+  } catch (e) {
+    // Silencioso: si el navegador rechaza la petición (p. ej. iOS),
+    // no rompemos nada; el botón simplemente no tiene efecto ahí.
+  }
+}
  
     /* ============================================================
      *  buildTempGroup: construye un grupo temporal con un mapping
