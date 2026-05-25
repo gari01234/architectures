@@ -963,6 +963,24 @@
       return m + "." + d + "." + y;
     }
 
+    // ── Regla canónica de fertilidad (Q3) ──────────────────────────
+    //
+    //   Cuántas permutaciones engendra una fecha. Universal a las cinco
+    //   obras de Dear:. Nace de la fecha misma (no de un oráculo):
+    //
+    //     fertilidad = 1 + ( [ rdig(día)·rdig(mes)·rdig(sumaCifrasAño)
+    //                          + día + mes ] mod 24 )
+    //
+    //   rdig = raíz digital (reducir a un dígito sumando cifras).
+    function rdig(n) { n = Math.abs(n); if (n === 0) return 0; const r = n % 9; return r === 0 ? 9 : r; }
+    function sumaCifrasAnio(y) { return String(y).split('').reduce((a, b) => a + (+b), 0); }
+    function fertility(date) {
+      const dia = date.getDate(), mes = date.getMonth() + 1;
+      const sY = sumaCifrasAnio(date.getFullYear());
+      const k = rdig(dia) * rdig(mes) * rdig(sY) + dia + mes;
+      return 1 + (((k % 24) + 24) % 24);
+    }
+
     function formatDateISO(date) {
       // Para el <input type="date">: yyyy-mm-dd
       const y = date.getFullYear();
@@ -1000,8 +1018,14 @@
       currentDate = date;
       const seed = formatDateSeed(date);
 
-      const rngForN = mulberry32(hashString("n:" + seed));
-      const n = 1 + Math.floor(rngForN() * 7);
+      // N pedido = fertilidad canónica (Q3, rango 1..24) mapeada
+      // proporcionalmente a la escala de la casa-poema (1..7). Así la
+      // fertilidad del día se SIENTE en el tamaño de la casa: días de
+      // Q3 bajo dan casas pequeñas e íntimas; días de Q3 alto, casas
+      // llenas. La rejilla 5×5 no sostiene más de ~7 recintos, de ahí
+      // el tope del rango. generateHouse baja desde este N buscando la
+      // mayor casa válida.
+      const n = Math.max(1, Math.round(fertility(date) * 7 / 24));
 
       const house = generateHouse(seed, n);
       currentHouse = house;
