@@ -14,7 +14,7 @@
   <!-- Three .js + OrbitControls (una sola vez) -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
- 
+
   <style>
   body {
     margin: 0;
@@ -51,7 +51,7 @@
   button:hover{
     background:rgba(255,255,255,0.20);
   }
- 
+
   #permNextButton{
     position:fixed;
     z-index:260;
@@ -72,7 +72,7 @@
   #permNextButton:hover{
     background:rgba(255,255,255,0.20);
   }
- 
+
   /* Botón de pantalla completa: mismo lenguaje visual que el 120,
      visible siempre, anclado abajo-derecha. El botón 120 (efímero,
      solo con UI oculta) se coloca encima de él. */
@@ -96,7 +96,7 @@
   #fullscreenButton:hover{
     background:rgba(255,255,255,0.20);
   }
- 
+
   /* === Main UI layout === */
   #toggleTextButton {
     position:fixed; left:10px; bottom:10px;
@@ -114,10 +114,10 @@
   #saveImageButton      { position:fixed; right:10px; bottom:50px;   }   /* Save Image (A2) */
   #uploadConfigButton   { position:fixed; right:10px; bottom:90px;   }   /* Load JSON */
   #exportEmbedButton    { position:fixed; right:10px; bottom:130px;  }   /* Save JSON */
- 
+
   #saveImageButton { background:rgba(255,255,255,0.2); }
- 
- 
+
+
   #controls {
     position: absolute;
     top: 10px;
@@ -127,15 +127,15 @@
     border-radius: 5px;
     background: rgba(255,255,255,0.12);
     max-width: 350px;
- 
+
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
- 
+
     max-height: 60vh;
   }
- 
+
   #controls::-webkit-scrollbar { width: 10px; }
   #controls::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 8px; }
   #controls::-webkit-scrollbar-track { background: rgba(255,255,255,0.06); }
@@ -147,8 +147,8 @@
   details summary:hover { color: #333; }
   select, input[type="range"], input[type="color"] { cursor: none; width: 100%; }
   #permutationList { width: 100%; height: 100px; }
- 
- 
+
+
   /* === Information button & panel === */
   #frontWallButton{
     position:fixed; left:10px; bottom:50px; z-index:260;
@@ -156,7 +156,7 @@
   #xrayButton{
     position:fixed; left:10px; bottom:90px; z-index:260;
   }
- 
+
 #permOverrideList .permOverrideRow{
   margin: 8px 0 10px;
 }
@@ -183,7 +183,7 @@
   padding: 6px 10px;
   font-size: 11px;
 }
- 
+
   /* === Título de la pieza (estilo unificado con las demás Dear:) === */
   #pieceTitle {
     position: fixed;
@@ -204,32 +204,32 @@
 </head>
 <body>
   <div id="customCursor"></div>
- 
+
   <!-- Título de la pieza con la fecha del ciclo activo (estilo Kawara) -->
   <div id="pieceTitle">Dear: Thoughts</div>
- 
+
   <!-- Botón 120: recorre los 120 fenotipos (reorganizaciones de
        atributos) de la misma arquitectura genotípica del día. -->
   <button id="fullscreenButton" onclick="toggleFullscreen()">⛶</button>
   <button id="permNextButton" onclick="nextPerm120()">120</button>
- 
+
   <input type="file" id="json-upload" accept=".json" style="display:none;" />
- 
+
   <button id="toggleTextButton"   onclick="toggleTexts()">Hide UI</button>
   <button id="uploadConfigButton" onclick="document.getElementById('json-upload').click()">Load JSON</button>
   <button id="saveImageButton"    onclick="saveImage()">Save Image (A2)</button>
   <button id="exportEmbedButton"  onclick="exportEmbed()">Save JSON</button>
- 
- 
+
+
   <button id="frontWallButton" onclick="toggleFrontWall()">Hide Front Wall</button>
   <button id="xrayButton" onclick="toggleXRay()">X-Ray: Off</button>
- 
- 
- 
- 
+
+
+
+
   <div id="controls">
   
- 
+
   <details open>
     <summary>Dear: Thoughts</summary>
     <div style="margin-top:6px;">
@@ -238,7 +238,7 @@
       <button id="todayButton" onclick="goToToday()" style="width:100%;">today</button>
     </div>
   </details>
- 
+
   <div id="manualControls">
     <details>
       <summary>Select Permutations</summary>
@@ -246,40 +246,40 @@
       <button onclick="refreshAll({rebuild:true})">Render</button>
     </details>
   </div>
- 
- 
+
+
   <details>
   <summary>Manual Colors (override)</summary>
- 
+
   <div id="permOverrideList" style="margin-top:6px;"></div>
- 
+
   <div id="chromaModeStatus" style="margin-top:6px;opacity:.85;">
     Chroma: canonical
   </div>
- 
+
   <button id="btnResetAll" style="margin-top:6px;" onclick="resetAllColours()">
     Return to canonical (clear overrides)
   </button>
 </details>
- 
+
   <details>
     <summary>Background</summary>
     <input type="color" id="bgColor" value="#ffffff">
     <button onclick="updateBackground()">Apply Background</button>
   </details>
- 
+
   <details>
     <summary>Cube Walls Color</summary>
     <input type="color" id="cubeColor" value="#808080">
     <button onclick="updateCubeColor()">Apply Cube Walls</button>
   </details>
- 
+
   <details>
     <summary>Attributes Reorganization</summary>
     <select id="attrMapping"></select>
     <button onclick="updateMapping()">Apply</button>
   </details>
- 
+
   <details>
     <summary>Standard Views</summary>
     <select id="standardView">
@@ -291,65 +291,65 @@
     </select>
     <button onclick="applyStandardView()">Apply View</button>
   </details>
- 
+
   <details>
     <summary>Zoom Controls</summary>
     <button onclick="zoomIn()">Zoom In</button>
     <button onclick="zoomOut()">Zoom Out</button>
   </details>
- 
+
   <details>
     <summary>Motion Controls</summary>
     <button onclick="togglePause()">Pause Motion</button>
     <button onclick="resetMovement()">Reset Motion</button>
   </details>
 </div>
- 
- 
+
+
 <script>
 document.getElementById('json-upload').addEventListener('change', function(event) {
   const file = event.target.files[0];
   if (!file) return;
- 
+
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const config = JSON.parse(e.target.result);
- 
+
       // Permutations
       if (config.perms && Array.isArray(config.perms)) {
         const sel = document.getElementById('permutationList');
         Array.from(sel.options).forEach(o => o.selected = config.perms.includes(o.value));
       }
- 
+
       // Mapping
       if (config.mapping) {
         const v = [config.mapping.forma, config.mapping.color, config.mapping.x, config.mapping.y, config.mapping.z];
         document.getElementById('attrMapping').value = v.join(',');
         attributeMapping = [v[0], v[1], v[2], v[3], v[4], attributeMapping[5], attributeMapping[6]];
       }
- 
+
       // Chroma mode + overrides con fallback a formatos legacy
 permOverride = {};
 bgOverride = null;
 cubeOverride = null;
- 
+
 if (config.overrides && typeof config.overrides === 'object') {
   // Nuevo: overrides.perms (por permStr)
   const permsOv = (config.overrides.perms && typeof config.overrides.perms === 'object')
     ? config.overrides.perms
     : {};
- 
+
   Object.entries(permsOv).forEach(([ps, c]) => {
     const h = normHex6(c);
     if (h) permOverride[ps] = h;
   });
- 
+
   // Legacy dentro de overrides: overrides.channels (1..5)
   const ch = (config.overrides.channels && typeof config.overrides.channels === 'object')
     ? config.overrides.channels
     : null;
- 
+
   if (ch) {
     const channelMap = {};
     Object.entries(ch).forEach(([i, c]) => {
@@ -359,7 +359,7 @@ if (config.overrides && typeof config.overrides === 'object') {
     });
     applyChannelOverridesToSelected(channelMap);
   }
- 
+
   bgOverride   = normHex6(config.overrides.bg)   || null;
   cubeOverride = normHex6(config.overrides.cube) || null;
 } else {
@@ -367,7 +367,7 @@ if (config.overrides && typeof config.overrides === 'object') {
   if (config.colors && typeof config.colors === 'object') {
     const keys = Object.keys(config.colors);
     const looksLikePermMap = keys.some(k => k.includes(','));
- 
+
     if (looksLikePermMap) {
       Object.entries(config.colors).forEach(([ps, c]) => {
         const h = normHex6(c);
@@ -383,18 +383,18 @@ if (config.overrides && typeof config.overrides === 'object') {
       applyChannelOverridesToSelected(channelMap);
     }
   }
- 
+
   bgOverride   = normHex6(config.bg)   || null;
   cubeOverride = normHex6(config.cube) || null;
 }
- 
+
 // Modo explícito si viene; si no, inferimos
 if (typeof config.chroma_mode === 'string') {
   setChromaMode(config.chroma_mode.toUpperCase() === 'HABITATED' ? 'HABITATED' : 'CANONICAL');
 } else {
   setChromaMode(hasOverrides() ? 'HABITATED' : 'CANONICAL');
 }
- 
+
       // Scene invariants (optional)
       if (typeof config.sceneSeed === 'number') {
         sceneSeed = config.sceneSeed;
@@ -402,15 +402,15 @@ if (typeof config.chroma_mode === 'string') {
       if (typeof config.S_global === 'number') {
         S_global = config.S_global;
       }
- 
+
       // View
       const view = config.view || "front";
       document.getElementById('standardView').value = view;
- 
+
       // Rebuild
       refreshAll({rebuild:true});
       applyStandardView();
- 
+
       alert('JSON loaded successfully');
     } catch (err) {
       alert('Error loading JSON: ' + err.message);
@@ -419,17 +419,17 @@ if (typeof config.chroma_mode === 'string') {
   reader.readAsText(file);
 });
 </script>
- 
- 
+
+
   <!-- (eliminados: copias duplicadas de Three, OrbitControls y Ethers) -->
   <script>
     // ------------- JS principal -------------
- 
+
     // === Variables globales ===
     let scene, camera, renderer, controls, raycaster, mouse;
     let cubeUniverse, permutationGroup;
     const cubeSize = 30, halfCube = cubeSize/2;
- 
+
     let isPaused = false, textsVisible = true;
     let attributeMapping = [0,1,2,3,4, 0,1];   // forma,color,x,y,z,bg,wall
     let colorAttrCycle = 0;                    // ← cuenta las rotaciones de color
@@ -437,11 +437,11 @@ if (typeof config.chroma_mode === 'string') {
     let permOverride = {};        // overrides por permStr: {"1,2,3,4,5":"#rrggbb", ...}
     let bgOverride   = null;        // override del fondo (solo si el usuario interviene)
     let cubeOverride = null;        // override paredes (solo si el usuario interviene)
- 
+
     // --- Color management (A): UI shows sRGB albedo, scene stores linear ---
     let __bgHexSRGB   = '#ffffff';  // último color sRGB efectivo del background (para UI/export/canvas fill)
     let __cubeHexSRGB = '#808080';  // último color sRGB efectivo del cubo
- 
+
     // --- View helpers ---
     let frontWallVisible = true;
     let xrayMode = 'OFF';
@@ -457,7 +457,7 @@ if (typeof config.chroma_mode === 'string') {
       if(!/^#[0-9a-fA-F]{6}$/.test(s)) return null;
       return s.toLowerCase();
     }
- 
+
     function setColorFromSRGBHex(colorObj, hex){
       const h = normHex6(hex);
       if(!h) return;
@@ -465,39 +465,39 @@ if (typeof config.chroma_mode === 'string') {
       colorObj.setStyle(h);
       if (typeof colorObj.convertSRGBToLinear === 'function') colorObj.convertSRGBToLinear();
     }
- 
- 
- 
- 
+
+
+
+
 function updateViewButtonsUI(){
   const wallBtn = document.getElementById('frontWallButton');
   const xrayBtn = document.getElementById('xrayButton');
- 
+
   if (wallBtn){
     wallBtn.textContent = frontWallVisible ? 'Hide Front Wall' : 'Show Front Wall';
   }
- 
+
   if (xrayBtn){
     xrayBtn.textContent = xrayMode === 'ON' ? 'X-Ray: On' : 'X-Ray: Off';
   }
 }
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
 function applyXRaySceneState(){
   const isGrid = xrayMode === 'ON';
- 
+
   if (rasterGridGroup){
     rasterGridGroup.visible = isGrid;
   }
- 
+
   if (permutationGroup){
     permutationGroup.visible = true;
   }
- 
+
   if (cubeUniverse){
     cubeUniverse.visible = true;
     if (cubeUniverse.material){
@@ -505,23 +505,23 @@ function applyXRaySceneState(){
       cubeUniverse.material.needsUpdate = true;
     }
   }
- 
+
   updateViewButtonsUI();
 }
- 
- 
+
+
 function updateRasterGridContrast(){
   const bg = new THREE.Color(__bgHexSRGB || '#ffffff');
   const luma = 0.2126 * bg.r + 0.7152 * bg.g + 0.0722 * bg.b;
   const inkHex = luma > 0.55 ? '#111111' : '#f2f2f2';
- 
+
   if (rasterGridMaterial){
     rasterGridMaterial.color.setStyle(inkHex);
     rasterGridMaterial.color.convertSRGBToLinear();
     rasterGridMaterial.opacity = luma > 0.55 ? 0.30 : 0.38;
     rasterGridMaterial.needsUpdate = true;
   }
- 
+
   if (rasterCenterMaterial){
     rasterCenterMaterial.color.setStyle(inkHex);
     rasterCenterMaterial.color.convertSRGBToLinear();
@@ -529,51 +529,51 @@ function updateRasterGridContrast(){
     rasterCenterMaterial.needsUpdate = true;
   }
 }
- 
+
 function createRasterGridHelper(){
   const group = new THREE.Group();
   const step = cubeSize / 5;
- 
+
   const borderVals = [];
   const centerVals = [];
- 
+
   for (let i = 0; i <= 5; i++){
     borderVals.push(-halfCube + i * step);
   }
- 
+
   for (let i = 0; i < 5; i++){
     centerVals.push(-halfCube + (step * 0.5) + i * step);
   }
- 
+
   const lineVerts = [];
   const pushLine = (x1, y1, z1, x2, y2, z2) => {
     lineVerts.push(x1, y1, z1, x2, y2, z2);
   };
- 
+
   // Líneas paralelas a X
   borderVals.forEach(y=>{
     borderVals.forEach(z=>{
       pushLine(-halfCube, y, z, halfCube, y, z);
     });
   });
- 
+
   // Líneas paralelas a Y
   borderVals.forEach(x=>{
     borderVals.forEach(z=>{
       pushLine(x, -halfCube, z, x, halfCube, z);
     });
   });
- 
+
   // Líneas paralelas a Z
   borderVals.forEach(x=>{
     borderVals.forEach(y=>{
       pushLine(x, y, -halfCube, x, y, halfCube);
     });
   });
- 
+
   const lineGeo = new THREE.BufferGeometry();
   lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lineVerts, 3));
- 
+
   rasterGridMaterial = new THREE.LineBasicMaterial({
     color: 0x111111,
     transparent: true,
@@ -583,12 +583,12 @@ function createRasterGridHelper(){
     toneMapped: false
   });
   rasterGridMaterial.color.convertSRGBToLinear();
- 
+
   const lines = new THREE.LineSegments(lineGeo, rasterGridMaterial);
   lines.renderOrder = 9999;
   lines.frustumCulled = false;
   group.add(lines);
- 
+
   // 125 centros reales de celda: x,y,z ∈ {-12,-6,0,6,12}
   const centerVerts = [];
   centerVals.forEach(x=>{
@@ -598,10 +598,10 @@ function createRasterGridHelper(){
       });
     });
   });
- 
+
   const pointGeo = new THREE.BufferGeometry();
   pointGeo.setAttribute('position', new THREE.Float32BufferAttribute(centerVerts, 3));
- 
+
   rasterCenterMaterial = new THREE.PointsMaterial({
     color: 0x111111,
     size: 5,
@@ -613,30 +613,30 @@ function createRasterGridHelper(){
     toneMapped: false
   });
   rasterCenterMaterial.color.convertSRGBToLinear();
- 
+
   const points = new THREE.Points(pointGeo, rasterCenterMaterial);
   points.renderOrder = 10000;
   points.frustumCulled = false;
   group.add(points);
- 
+
   group.visible = false;
   updateRasterGridContrast();
   return group;
 }
- 
+
 function toggleFrontWall(forceValue){
   frontWallVisible = (typeof forceValue === 'boolean') ? forceValue : !frontWallVisible;
- 
+
   try{
     if (window.WW && typeof window.WW.get === 'function'){
       const wall = window.WW.get();
       if (wall) wall.setVisible(frontWallVisible);
     }
   }catch(_){}
- 
+
   updateViewButtonsUI();
 }
- 
+
 function toggleXRay(forceValue){
   if (forceValue === true || forceValue === 'ON') {
     xrayMode = 'ON';
@@ -645,27 +645,27 @@ function toggleXRay(forceValue){
   } else {
     xrayMode = xrayMode === 'OFF' ? 'ON' : 'OFF';
   }
- 
+
   applyXRaySceneState();
 }
- 
- 
+
+
     function hasOverrides(){
   if (bgOverride) return true;
   if (cubeOverride) return true;
   return permOverride && Object.keys(permOverride).length > 0;
 }
- 
+
     function setChromaMode(mode){
       chromaMode = (mode === 'HABITATED') ? 'HABITATED' : 'CANONICAL';
       updateChromaModeUI();
     }
- 
+
     function markHabited(){
       if (chromaMode !== 'HABITATED') setChromaMode('HABITATED');
       else updateChromaModeUI();
     }
- 
+
     function updateChromaModeUI(){
       const el = document.getElementById('chromaModeStatus');
       if(!el) return;
@@ -675,21 +675,21 @@ function toggleXRay(forceValue){
         el.textContent = 'Chroma: canonical';
       }
     }
- 
+
 function permStrToArray(permStr){
   return permStr.split(',').map(Number);
 }
- 
+
 function canonicalHexForPermStr(permStr){
   return colorInfoForPermutation(permStrToArray(permStr)).hex;
 }
- 
+
 /* Compatibilidad: aplicar overrides legacy 1..5 a las permutaciones seleccionadas
    usando el “atributo color” del mapping (attributeMapping[1]) */
 function applyChannelOverridesToSelected(channelMap){
   const sel = document.getElementById('permutationList');
   if(!sel) return;
- 
+
   const permStrs = Array.from(sel.selectedOptions).map(o=>o.value);
   permStrs.forEach(ps=>{
     const pa = permStrToArray(ps);
@@ -698,16 +698,16 @@ function applyChannelOverridesToSelected(channelMap){
     if(hx) permOverride[ps] = hx;
   });
 }
- 
+
 function rebuildPermOverrideUI(){
   const wrap = document.getElementById('permOverrideList');
   if(!wrap) return;
- 
+
   wrap.innerHTML = '';
- 
+
   const sel = document.getElementById('permutationList');
   const permStrs = sel ? Array.from(sel.selectedOptions).map(o=>o.value) : [];
- 
+
   if(!permStrs.length){
     const empty = document.createElement('div');
     empty.style.opacity = '.7';
@@ -715,27 +715,27 @@ function rebuildPermOverrideUI(){
     wrap.appendChild(empty);
     return;
   }
- 
+
   permStrs.forEach((permStr, idx)=>{
     const autoHex = canonicalHexForPermStr(permStr);
     const ovHex   = permOverride[permStr] || null;
     const effHex  = (chromaMode === 'HABITATED' && ovHex) ? ovHex : autoHex;
- 
+
     const row = document.createElement('div');
     row.className = 'permOverrideRow';
- 
+
     const lab = document.createElement('div');
     lab.className = 'permOverrideLabel';
     lab.textContent = `Perm ${idx+1}: (${permStr})`;
- 
+
     const controls = document.createElement('div');
     controls.className = 'permOverrideControls';
- 
+
     const input = document.createElement('input');
     input.type = 'color';
     input.value = effHex;
     input.onchange = ()=> onPermColourPick(permStr, input.value);
- 
+
     const btn = document.createElement('button');
     btn.textContent = 'Clear';
     btn.disabled = !permOverride[permStr];
@@ -747,17 +747,17 @@ function rebuildPermOverrideUI(){
         refreshAll({rebuild:false});
       }
     };
- 
+
     controls.appendChild(input);
     controls.appendChild(btn);
- 
+
     row.appendChild(lab);
     row.appendChild(controls);
- 
+
     wrap.appendChild(row);
   });
 }
- 
+
 function onPermColourPick(permStr, hex){
   const h = normHex6(hex);
   if(!h) return;
@@ -765,7 +765,7 @@ function onPermColourPick(permStr, hex){
   markHabited();
   refreshAll({rebuild:false});
 }
- 
+
     /* variables globales para fondo y paredes */
     let bgHSV = {h:0,s:0,v:1};
     let wallHSV = {h:0,s:0,v:1};
@@ -775,23 +775,23 @@ function onPermColourPick(permStr, hex){
       let globalShift = 0;  // único desplazamiento global para posiciones (opción B)
     // === Render boost ==========================================================
     let __renderBoostApplied = false;
- 
+
     function enterBuildRenderBoost(){
       if (!renderer || __renderBoostApplied) return;
       __renderBoostApplied = true;
- 
+
       const PR = Math.min(window.devicePixelRatio || 1, 2.5);
       renderer.setPixelRatio(PR);
       renderer.toneMappingExposure = 0.90;
     }
- 
+
     /* ════════════════════════════════════════════════
    CHROMA ENGINE v2 · hash → HSV lattice 144×12×12
    - determinismo absoluto
    - sin conditioner / sin contraste / sin vibrance / sin emissive
    - campo cromático único mediante CHROMA_KEYS fijas
    ════════════════════════════════════════════════ */
- 
+
 /* ═════════ CUADRÍCULA HSV 144·12·12 ═════════ */
 const H_STEPS  = 144;                                   // 360° / 2.5°
 const S_LEVELS = [...Array(12)].map((_,i)=>0.25 + 0.72*i/11); // 0.25 – 0.97
@@ -799,7 +799,7 @@ const V_LEVELS = [...Array(12)].map((_,i)=>0.20 + 0.75*i/11); // 0.20 – 0.95
 const HSV_TOTAL   = H_STEPS * 12 * 12;                  // 20 736
 const HSV_S_STRIDE = H_STEPS;                           // 144
 const HSV_V_STRIDE = H_STEPS * 12;                      // 1 728
- 
+
 function idxToHSV(hIdx,sIdx,vIdx){
   const h = ((hIdx%H_STEPS)+H_STEPS) % H_STEPS;      // 0-143
   return {
@@ -808,9 +808,9 @@ function idxToHSV(hIdx,sIdx,vIdx){
     v: V_LEVELS[ ((vIdx%12)+12)%12 ]
   };
 }
- 
+
 /* Normaliza cualquier hue a rango [0 … 360) */
- 
+
 /* HSV → RGB */
 function hsvToRgb(h,s,v){
   h = ((h % 360) + 360) % 360;
@@ -824,26 +824,26 @@ function hsvToRgb(h,s,v){
   else {r=c;b=x;}
   return [(r+m)*255,(g+m)*255,(b+m)*255].map(v=>Math.round(v));
 }
- 
+
 /* HSV struct → #rrggbb */
 function hsvToHex({h,s,v}){
   const [r,g,b] = hsvToRgb(h,s,v);
   return '#'+new THREE.Color(r/255,g/255,b/255).getHexString();
 }
- 
+
 /* RGB [0..255] → #rrggbb */
 function rgbToHex(rgb){
   return '#'+new THREE.Color(rgb[0]/255, rgb[1]/255, rgb[2]/255).getHexString();
 }
- 
+
 /* ────────── Hash core (32-bit, determinista) ────────── */
- 
+
 /* FNV-1a 32-bit (mezcla enteros) */
 function fnv1a32(h, v){
   h ^= (v >>> 0);
   return Math.imul(h, 16777619) >>> 0;
 }
- 
+
 /* Avalancha 32-bit (finalizer) */
 function avalanche32(x){
   x ^= x >>> 16;
@@ -853,7 +853,7 @@ function avalanche32(x){
   x ^= x >>> 16;
   return x >>> 0;
 }
- 
+
 /* Proyección uniforme: u32 → (hIdx,sIdx,vIdx) en 144×12×12 */
 function hsvIdxFromU32(u){
   const t = (u % HSV_TOTAL) >>> 0;
@@ -862,42 +862,42 @@ function hsvIdxFromU32(u){
   const vIdx = ((t / HSV_V_STRIDE) | 0) % 12;
   return [hIdx, sIdx, vIdx];
 }
- 
+
 /* Llaves enteras fijas para el campo cromático único */
 const CHROMA_KEYS = [0x243f6a88, 0x85a308d3, 0x13198a2e];
- 
+
 function getChromaKeys(){
   return CHROMA_KEYS;
 }
- 
+
 /* Tags para separar dominios (glifo / fondo / paredes / palette) */
 const TAG_GLYPH = 0x474c5946; // 'GLYF'
 const TAG_BG    = 0x42475052; // 'BGPR'
 const TAG_WALL  = 0x57414c4c; // 'WALL'
- 
+
 /* Hash canónico para una permutación (puede ser “escena actual” o “escena hipotética”) */
 function hashPermutationCore(pa, sig, r, seedVal, sVal){
   const keys = getChromaKeys();
- 
+
   let h = 0x811c9dc5;
   h = fnv1a32(h, seedVal | 0);
   h = fnv1a32(h, sVal    | 0);
   h = fnv1a32(h, keys[0]); h = fnv1a32(h, keys[1]); h = fnv1a32(h, keys[2]);
   h = fnv1a32(h, TAG_GLYPH);
- 
+
   h = fnv1a32(h, r | 0);
- 
+
   for(let i=0;i<5;i++) h = fnv1a32(h, pa[i] | 0);
   for(let i=0;i<5;i++) h = fnv1a32(h, sig[i] | 0);
- 
+
   return avalanche32(h);
 }
- 
- 
+
+
 /* Hash canónico para color de escena (fondo / paredes) */
 function hashSceneCore(sig, slot, seedVal, sVal, tag){
   const keys = getChromaKeys();
- 
+
   let h = 0x811c9dc5;
   h = fnv1a32(h, seedVal | 0);
   h = fnv1a32(h, sVal    | 0);
@@ -907,8 +907,8 @@ function hashSceneCore(sig, slot, seedVal, sVal, tag){
   for(let i=0;i<5;i++) h = fnv1a32(h, sig[i] | 0);
   return avalanche32(h);
 }
- 
- 
+
+
 /* API canónica: color del glifo */
 function colorInfoForPermutation(pa, seedVal = sceneSeed, sVal = S_global){
   const r = lehmerRank(pa);
@@ -920,14 +920,14 @@ function colorInfoForPermutation(pa, seedVal = sceneSeed, sVal = S_global){
   const hex = rgbToHex(rgb);
   return { r, sig, u, hIdx, sIdx, vIdx, hsv, rgb, hex };
 }
- 
+
 function colorForPermutation(pa){
   return colorInfoForPermutation(pa).rgb;
 }
- 
+
 /* API canónica: color “de canal” 1..5 (para el panel manual), derivado sólo de invariantes */
- 
- 
+
+
 /* API canónica: HSV del fondo/paredes */
 function hsvInfoForScene(tag, sig, slot, seedVal = sceneSeed, sVal = S_global){
   const u = hashSceneCore(sig, slot, seedVal, sVal, tag);
@@ -937,24 +937,24 @@ function hsvInfoForScene(tag, sig, slot, seedVal = sceneSeed, sVal = S_global){
   const hex = rgbToHex(rgb);
   return { u, hIdx, sIdx, vIdx, hsv, rgb, hex };
 }
- 
- 
+
+
 /* ---------- FIN BLOQUE UTILIDADES ---------- */
 /* ——— calcula HSV para fondo y paredes de forma acoplada al set activo ——— */
 function rebuildSceneColours(){
   const perms = Array.from(document.getElementById('permutationList').selectedOptions)
     .map(o => o.value.split(',').map(Number));
- 
+
   const firstSig = perms[0] ? computeSignature(perms[0]) : [0,0,0,0,0];
   const lastSig  = perms.length ? computeSignature(perms[perms.length-1]) : firstSig;
- 
+
   const n = perms.length | 0;
- 
+
   // Fondo y paredes: sólo invariantes + firma + slot (n / n+1)
   bgHSV   = hsvInfoForScene(TAG_BG,   firstSig, n).hsv;
   wallHSV = hsvInfoForScene(TAG_WALL, lastSig,  n+1).hsv;
 }
- 
+
 /* ===\u2003UTIL extra — firma normalizada y contraste\u2003===================== */
 // 1)  f̂  de un glifo  →  promedio firma, llevada a [0-1]
 /* contrast-fix eliminado: función ensureContrast() suprimida */
@@ -966,10 +966,10 @@ function rebuildSceneColours(){
       4:{w:4.5,h:4.5*Math.sqrt(4)},
       5:{w:4.5,h:4.5*Math.sqrt(5)}
     };
- 
+
     function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
     function mapRangeToSpeed(r,mn,mx){return 0.001 + (r-mn)*(0.005-0.001)/(mx-mn);}
- 
+
     function getPermutations(arr){
       if(arr.length===1) return [arr];
       let res=[]; for(let i=0;i<arr.length;i++){
@@ -980,7 +980,7 @@ function rebuildSceneColours(){
     }
     const allPermutations = getPermutations([1,2,3,4,5]);
     const permutationStrings = allPermutations.map(p=>p.join(','));
- 
+
     // ════════════════════════════════════════════════════════════════
     //  Dear: Thoughts — régimen calendárico
     //
@@ -992,21 +992,21 @@ function rebuildSceneColours(){
     //  Determinismo total: misma fecha → misma escena, siempre.
     //  El sistema permanece invariante en el tiempo.
     // ════════════════════════════════════════════════════════════════
- 
+
     const EPOCH_THOUGHTS = new Date(2026, 4, 16); // mes 4 = mayo (0-indexed)
     const CYCLE_DAYS = 6;
- 
+
     // Normaliza una fecha a medianoche local (sin horas).
     function dayOnly(d) {
       return new Date(d.getFullYear(), d.getMonth(), d.getDate());
     }
- 
+
     // Días transcurridos desde EPOCH (entero).
     function daysSinceEpoch(date) {
       const ms = dayOnly(date).getTime() - dayOnly(EPOCH_THOUGHTS).getTime();
       return Math.floor(ms / 86400000);
     }
- 
+
     // Devuelve la fecha del primer día del ciclo activo para `date`.
     // Si date está antes de EPOCH, devuelve EPOCH (no hay ciclos
     // negativos: la pieza empieza el 16 de mayo de 2026).
@@ -1018,7 +1018,7 @@ function rebuildSceneColours(){
       start.setDate(start.getDate() + cycleIndex * CYCLE_DAYS);
       return start;
     }
- 
+
     // Formato Kawara: MMM.DD.YYYY (e.g. "MAY.16.2026").
     const MONTH_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN",
                         "JUL","AUG","SEP","OCT","NOV","DEC"];
@@ -1028,7 +1028,7 @@ function rebuildSceneColours(){
       const y = date.getFullYear();
       return `${m}.${d}.${y}`;
     }
- 
+
     // Semilla entera derivada de la fecha (estable, determinista).
     // Concatena AAAAMMDD y aplica FNV-1a + avalanche para mezclar.
     // hashString: FNV-1a 32-bit. IDÉNTICA a la de Poems/Words/Letters,
@@ -1042,7 +1042,7 @@ function rebuildSceneColours(){
       }
       return h >>> 0;
     }
- 
+
     // Cadena-semilla en el formato común del sistema: "MAY.16.2026"
     // (mes abreviado, día sin cero a la izquierda, año). Idéntico a
     // formatDateSeed de las otras piezas (MONTH_ABBR == MONTH_NAMES).
@@ -1052,14 +1052,35 @@ function rebuildSceneColours(){
       const y = date.getFullYear();
       return m + "." + d + "." + y;
     }
- 
+
     // Semilla raíz del ciclo. Ahora deriva EXACTAMENTE igual que las
     // demás piezas Dear: hashString(formatDateSeed(date)). Así, una
     // misma fecha produce la misma semilla raíz en las cuatro obras.
     function seedFromDate(date) {
       return hashString(formatDateSeed(date));
     }
- 
+
+    // ── Regla canónica de fertilidad (Q3) ──────────────────────────
+    //
+    //   Cuántas permutaciones engendra una fecha. Universal a las cinco
+    //   obras de Dear:. Nace de la fecha misma (no de un oráculo):
+    //
+    //     fertilidad = 1 + ( [ rdig(día)·rdig(mes)·rdig(sumaCifrasAño)
+    //                          + día + mes ] mod 24 )
+    //
+    //   rdig = raíz digital (reducir a un dígito sumando cifras).
+    //   En Thoughts, Q3 fija CUÁNTAS permutaciones se proponen; el
+    //   filtro de admisibilidad universal (las 120 vistas) decide
+    //   cuáles se sostienen, exactamente como antes.
+    function rdig(n) { n = Math.abs(n); if (n === 0) return 0; const r = n % 9; return r === 0 ? 9 : r; }
+    function sumaCifrasAnio(y) { return String(y).split('').reduce((a, b) => a + (+b), 0); }
+    function fertility(date) {
+      const dia = date.getDate(), mes = date.getMonth() + 1;
+      const sY = sumaCifrasAnio(date.getFullYear());
+      const k = rdig(dia) * rdig(mes) * rdig(sY) + dia + mes;
+      return 1 + (((k % 24) + 24) % 24);
+    }
+
     // Mulberry32: RNG determinista de 32 bits.
     // Devuelve una función que produce floats en [0, 1).
     function mulberry32(seed) {
@@ -1072,12 +1093,11 @@ function rebuildSceneColours(){
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       };
     }
- 
+
     // Selecciona N permutaciones (sin repetir) determinísticamente
     // desde un RNG sembrado. N se decide también con el RNG, en el
     // rango [1, 25] como en PRMTTN.
-    function pickPermsForCycle(rng) {
-      const n = 1 + Math.floor(rng() * 25);  // [1, 25]
+    function pickPermsForCycle(rng, n) {
       const indices = [];
       const used = new Set();
       while (indices.length < n) {
@@ -1089,7 +1109,7 @@ function rebuildSceneColours(){
       }
       return indices.map(i => permutationStrings[i].split(',').map(Number));
     }
- 
+
     // ── Admisibilidad universal ──────────────────────────────────
     // Un candidato (conjunto de permutaciones) es ADMISIBLE solo si
     // se mantiene íntegro —sin colisiones— en las 120 reorganizaciones
@@ -1112,7 +1132,7 @@ function rebuildSceneColours(){
       }
       return true;  // íntegro en las 120 manifestaciones
     }
- 
+
     // Genera la escena del ciclo correspondiente a `date`.
     // Determinista: misma fecha → misma escena, siempre.
     // No usa Math.random en ningún punto.
@@ -1134,35 +1154,41 @@ function rebuildSceneColours(){
       const cycleStart = getCycleStartDate(date);
       const seed = seedFromDate(cycleStart);
       const rng = mulberry32(seed);
- 
-      // Secuencia determinista de candidatos: se toma el PRIMERO que
-      // se sostiene íntegro en las 120 reorganizaciones. El RNG avanza
-      // de forma fija, así que la secuencia de candidatos —y por tanto
-      // el genotipo resultante— es siempre la misma para esta fecha.
+
+      // La fecha PROPONE con Q3 cuántas permutaciones; la geometría
+      // DISPONE: el filtro de admisibilidad universal (las 120 vistas)
+      // decide cuáles se sostienen. Si el tamaño Q3 no halla candidato
+      // admisible, se baja al mayor n que sí lo logre — "lo que la
+      // fecha puede sostener". El RNG avanza de forma fija, así que la
+      // secuencia de candidatos —y el genotipo resultante— es siempre
+      // la misma para esta fecha (determinista).
+      const nObjetivo = fertility(cycleStart);
+
       let perms = null;
-      const MAX_TRIES = 2000;
-      for (let t = 0; t < MAX_TRIES; t++) {
-        const candidate = pickPermsForCycle(rng);   // subconjunto único
-        if (isUniversallyAdmissible(candidate)) {
-          perms = candidate;
-          break;
+      const TRIES_PER_N = 400;
+      for (let n = nObjetivo; n >= 1 && !perms; n--) {
+        for (let t = 0; t < TRIES_PER_N; t++) {
+          const candidate = pickPermsForCycle(rng, n);   // subconjunto único de tamaño n
+          if (isUniversallyAdmissible(candidate)) {
+            perms = candidate;
+            break;
+          }
         }
       }
- 
-      // Fallback determinista: una sola permutación es trivialmente
+
+      // Red de seguridad final: una sola permutación es trivialmente
       // admisible (un volumen no colisiona consigo mismo en ninguna
-      // vista). En la práctica nunca se alcanza —siempre se halla un
-      // candidato admisible en pocos intentos—, pero garantiza que la
-      // función siempre devuelve una escena íntegra.
+      // vista). Sólo se alcanzaría si nada entre Q3 y 2 se sostuviera,
+      // lo que en la práctica no ocurre; garantiza una escena íntegra.
       if (!perms) {
         perms = [[1,2,3,4,5]];
       }
- 
+
       // Mapping inicial = identidad. Como el candidato es íntegro en
       // las 120 vistas, cualquiera de ellas sirve como punto de partida;
       // se elige la identidad por ser la reorganización canónica.
       const mapping = [0,1,2,3,4, attributeMapping[5], attributeMapping[6]];
- 
+
       // Aplicar la selección al estado de la escena.
       const sel = document.getElementById('permutationList');
       Array.from(sel.options).forEach(o => o.selected = false);
@@ -1171,13 +1197,13 @@ function rebuildSceneColours(){
         const opt = sel.querySelector(`option[value="${val}"]`);
         if (opt) opt.selected = true;
       });
- 
+
       attributeMapping = mapping;
       const attrSel = document.getElementById('attrMapping');
       if (attrSel) {
         attrSel.value = `${mapping[0]},${mapping[1]},${mapping[2]},${mapping[3]},${mapping[4]}`;
       }
- 
+
       // Resetear el recorrido de las 120 vistas: la escena nace en la
       // reorganización identidad (perm120List[0] === [0,1,2,3,4]), así
       // que el contador debe volver a 0. Si no, tras haber avanzado con
@@ -1187,26 +1213,26 @@ function rebuildSceneColours(){
       // de 0 a 1.
       perm120Index = 0;
       if (typeof updatePerm120Status === 'function') updatePerm120Status();
- 
+
       refreshAll({rebuild: true});
- 
+
       // Actualizar HUD y document.title con la fecha del ciclo activo
       // (formato Kawara: MMM.DD.YYYY).
       const cycleLabel = formatKawara(cycleStart);
       const titleEl = document.getElementById('pieceTitle');
       if (titleEl) titleEl.textContent = "Dear: Thoughts — " + cycleLabel;
       document.title = "Dear: Thoughts — " + cycleLabel;
- 
+
       return { cycleStart, seed, perms, mapping };
     }
- 
+
     // ── Calendario (navegación de fechas) ──────────────────────────
     //
     //   Igual que las demás piezas Dear: el usuario puede viajar entre
     //   la fecha cero (EPOCH) y hoy. Ni antes (la obra no existía) ni
     //   después (el día no ha llegado). La fecha elegida produce el
     //   ciclo, y el ciclo produce la escena.
- 
+
     function formatDateISO(date) {
       // Para el <input type="date">: yyyy-mm-dd
       const y = date.getFullYear();
@@ -1214,7 +1240,7 @@ function rebuildSceneColours(){
       const d = String(date.getDate()).padStart(2, "0");
       return y + "-" + m + "-" + d;
     }
- 
+
     function parseDateISO(s) {
       // Parsea yyyy-mm-dd como fecha local (no UTC).
       const parts = s.split("-");
@@ -1222,19 +1248,19 @@ function rebuildSceneColours(){
                       parseInt(parts[1], 10) - 1,
                       parseInt(parts[2], 10));
     }
- 
+
     function dateIsAfter(a, b) {
       const A = new Date(a.getFullYear(), a.getMonth(), a.getDate());
       const B = new Date(b.getFullYear(), b.getMonth(), b.getDate());
       return A.getTime() > B.getTime();
     }
- 
+
     function dateIsBefore(a, b) {
       const A = new Date(a.getFullYear(), a.getMonth(), a.getDate());
       const B = new Date(b.getFullYear(), b.getMonth(), b.getDate());
       return A.getTime() < B.getTime();
     }
- 
+
     function onDateChange() {
       const input = document.getElementById('dateInput');
       const v = input.value;
@@ -1253,14 +1279,14 @@ function rebuildSceneColours(){
       }
       generateCycleScene(chosen);
     }
- 
+
     function goToToday() {
       const today = new Date();
       const input = document.getElementById('dateInput');
       if (input) input.value = formatDateISO(today);
       generateCycleScene(today);
     }
- 
+
     function getAttributeMappings(a){
       if(a.length===1) return [a];
       let res=[]; for(let i=0;i<a.length;i++){
@@ -1269,7 +1295,7 @@ function rebuildSceneColours(){
       }
       return res;
     }
- 
+
     function populatePermutationList(){
       const sel = document.getElementById('permutationList');
       sel.innerHTML = '';
@@ -1290,10 +1316,10 @@ function rebuildSceneColours(){
         sel.appendChild(o);
       });
     }
- 
+
     function computeSignature(a){let s=[];for(let i=0;i<a.length;i++) s.push(a[i]+a[(i+1)%a.length]);return s;}
     function computeRange(sig){return Math.max(...sig)-Math.min(...sig);}
- 
+
     const FACT=[1,1,2,6,24,120];
     let sceneSeed=0;
     function lehmerRank(p){
@@ -1305,15 +1331,15 @@ function rebuildSceneColours(){
       }
       return r;
     }
- 
+
     /* ========= NUEVO: sceneSeed orden‑invariante + dependiente del mapping ========= */
- 
+
     /** Rank del mapping [m0..m4] usando Lehmer rank sobre [m_i+1] (1..5) */
     function mappingRank(m){
       const arr = [m[0]+1, m[1]+1, m[2]+1, m[3]+1, m[4]+1];
       return lehmerRank(arr);
     }
- 
+
     /** sceneSeed = (37·sumR + 101·sumR2 + 53·mRank) mod 360  (orden‑invariante) */
     function computeSceneSeedFrom(perms, m){
       let sumR = 0, sumR2 = 0;
@@ -1334,7 +1360,7 @@ function rebuildSceneColours(){
       });
       return S % 125;
     }
- 
+
     /** Desplazamiento global único para posiciones */
     function computeGlobalShift(perms, m){
       let sumR = 0;
@@ -1343,20 +1369,20 @@ function rebuildSceneColours(){
       });
       return (sumR + mappingRank(m)) % 125;
     }
- 
+
     function getShiftRankCellInfo(p){
       const r = lehmerRank(p);
       const I = (r + globalShift) % 125;
- 
+
       const xIndex = Math.floor(I / 25);
       const yIndex = Math.floor((I % 25) / 5);
       const zIndex = I % 5;
- 
+
       const step = cubeSize / 5;
       const X = (xIndex - 2) * step;
       const Y = (yIndex - 2) * step;
       const Z = (zIndex - 2) * step;
- 
+
       return {
         r,
         I,
@@ -1371,62 +1397,62 @@ function rebuildSceneColours(){
         Z
       };
     }
- 
+
     function createPermutationObjectWithMapping(pa,map){
   const fv = pa[map[0]];
   const d  = shapeMapping[fv];
   const w  = d.w, h = d.h, t = 0.5;
- 
+
   // Color canónico (hash → HSV lattice → RGB)
   const rgb = colorForPermutation(pa);
- 
+
   // Posición discreta real: centro de una de las 125 celdas
   const cell = getShiftRankCellInfo(pa);
- 
+
   // Material: el hex/rgb viene en sRGB (albedo). Convertimos a lineal antes de renderizar.
   const mat = new THREE.MeshLambertMaterial({
     color: new THREE.Color(rgb[0]/255, rgb[1]/255, rgb[2]/255).convertSRGBToLinear(),
     dithering: true
   });
- 
+
   const geo  = new THREE.BoxGeometry(w,h,t);
   const mesh = new THREE.Mesh(geo, mat);
- 
+
   mesh.position.set(
     clamp(cell.X,-halfCube+w/2,halfCube-w/2),
     clamp(cell.Y,-halfCube+h/2,halfCube-h/2),
     clamp(cell.Z,-halfCube+t/2,halfCube-t/2)
   );
- 
+
   const sig = computeSignature(pa);
   const rg  = computeRange(sig);
- 
+
   mesh.userData = {
     permStr: pa.join(','),
     signature: sig,
     range: rg,
     rotationSpeed: mapRangeToSpeed(rg, minRangeValue, maxRangeValue),
- 
+
     lehmerRank: cell.r,
     shiftIndex: cell.I,
- 
+
     cellIndexX: cell.xIndex,
     cellIndexY: cell.yIndex,
     cellIndexZ: cell.zIndex,
- 
+
     cellHumanX: cell.xHuman,
     cellHumanY: cell.yHuman,
     cellHumanZ: cell.zHuman,
- 
+
     centerX: cell.X,
     centerY: cell.Y,
     centerZ: cell.Z
   };
- 
+
   return mesh;
 }
     function createPermutationObject(pa){ return createPermutationObjectWithMapping(pa,attributeMapping); }
- 
+
     function checkCollisionsInGroup(g){
       for(let i=0;i<g.children.length;i++){
         const b1=new THREE.Box3().setFromObject(g.children[i]);
@@ -1437,7 +1463,7 @@ function rebuildSceneColours(){
       }
       return false;
     }
- 
+
 /* ==============================
  * 120 Architectural Permutations — FENOTIPO
  *
@@ -1453,12 +1479,12 @@ function rebuildSceneColours(){
  * ============================== */
 let perm120List = getAttributeMappings([0,1,2,3,4]); // 120
 let perm120Index = 0;
- 
+
 function updatePerm120Status(){
   const stat = document.getElementById('perm120Status');
   if(stat) stat.textContent = `Permutation: ${perm120Index} / 119`;
 }
- 
+
 function applyPerm120Index(i){
   perm120Index = ((i % perm120List.length) + perm120List.length) % perm120List.length;
   const m = perm120List[perm120Index];
@@ -1467,9 +1493,9 @@ function applyPerm120Index(i){
   refreshAll({rebuild:true});
   updatePerm120Status();
 }
- 
+
 function nextPerm120(){ applyPerm120Index(perm120Index + 1); }
- 
+
 // Pantalla completa. Usa la Fullscreen API estándar con respaldo
 // webkit (Safari de escritorio). Nota: en iPad/iPhone Safari esta API
 // está restringida por Apple y puede no ocultar la barra; en esos
@@ -1492,51 +1518,51 @@ function toggleFullscreen(){
     // no rompemos nada; el botón simplemente no tiene efecto ahí.
   }
 }
- 
+
     /* ============================================================
      *  buildTempGroup: construye un grupo temporal con un mapping
      *  dado, sin tocar la escena real. Lo usa
      *  isUniversallyAdmissible para evaluar colisiones en las 120 vistas.
      *  ============================================================
      */
- 
+
     /** Construye un grupo temporal con un mapping dado, sin tocar la escena real */
 function buildTempGroup(perms, mapping){
   const tg = new THREE.Group();
- 
+
   // Guardamos estado global
   const prevSeed  = sceneSeed;
   const prevS     = S_global;
   const prevShift = globalShift;
   const prevMap   = attributeMapping.slice();
- 
+
   // Calculamos los nuevos valores teóricos
   const tmpSeed  = computeSceneSeedFrom(perms, mapping);
   const tmpS     = computeGlobalS(perms, mapping);
   const tmpShift = computeGlobalShift(perms, mapping);
- 
+
   // Seteamos temporalmente los globales para que createPermutationObjectWithMapping
   // use exactamente la misma lógica que la escena final
   sceneSeed        = tmpSeed;
   S_global         = tmpS;
   globalShift      = tmpShift;
   attributeMapping = mapping;
- 
+
   perms.forEach(pa=>{
     const mesh = createPermutationObjectWithMapping(pa, mapping);
     tg.add(mesh);
   });
- 
+
   // Restauramos
   sceneSeed        = prevSeed;
   S_global         = prevS;
   globalShift      = prevShift;
   attributeMapping = prevMap;
- 
+
   return tg;
 }
- 
- 
+
+
 function updateScene(attemptResolve=true){
   // Limpia grupo
   while(permutationGroup.children.length>0){
@@ -1544,16 +1570,16 @@ function updateScene(attemptResolve=true){
     permutationGroup.remove(o);
     o.geometry.dispose(); o.material.dispose();
   }
- 
+
   // Permutaciones activas
   const opts  = Array.from(document.getElementById('permutationList').selectedOptions);
   const perms = opts.map(o => o.value.split(',').map(Number));
- 
+
   // Invariantes de escena
   sceneSeed   = computeSceneSeedFrom(perms, attributeMapping); // croma
   S_global    = computeGlobalS(perms, attributeMapping);       // croma
   globalShift = computeGlobalShift(perms, attributeMapping);   // posición
- 
+
   // Construye objetos
   perms.forEach(pa=>{
     const obj = createPermutationObject(pa);
@@ -1565,7 +1591,7 @@ function updateScene(attemptResolve=true){
       // no recibe información sobre cada glifo. Si quieres consultar
       // datos del ciclo, usa Save JSON.
     }
- 
+
     function zoomIn(){camera.position.z-=5;controls.update();}
     function zoomOut(){camera.position.z+=5;controls.update();}
     function togglePause(){
@@ -1579,18 +1605,18 @@ function updateScene(attemptResolve=true){
       const b=document.querySelector("button[onclick='togglePause()']");
       b.textContent="Resume Motion";
     }
- 
+
 function saveImage(){
   const A2_W = 7016, A2_H = 4961;
- 
+
   const prevPixelRatio = renderer.getPixelRatio();
   const prevSize       = renderer.getSize(new THREE.Vector2());
   const prevAspect     = camera.aspect;
   const prevRt         = renderer.getRenderTarget?.() || null;
   const prevBg         = scene.background ? scene.background.clone() : null;
- 
+
   const screenAspect = prevSize.x / prevSize.y;
- 
+
   // Render con el MISMO aspect que se ve en pantalla
   let renderW, renderH;
   const a2Aspect = A2_W / A2_H;
@@ -1601,24 +1627,24 @@ function saveImage(){
     renderH = A2_H;
     renderW = Math.round(A2_H * screenAspect);
   }
- 
+
   renderer.setPixelRatio(1);
   renderer.setSize(renderW, renderH, false);
   camera.aspect = screenAspect;
   camera.updateProjectionMatrix();
- 
+
   const rt = new THREE.WebGLRenderTarget(renderW, renderH, { depthBuffer:true, stencilBuffer:false });
   rt.texture.encoding = THREE.sRGBEncoding; // IMPORTANT: igualar salida a pantalla
- 
+
   const clearHex = __bgHexSRGB || '#ffffff';     // para el canvas (sRGB)
   renderer.setClearColor(prevBg || new THREE.Color(clearHex).convertSRGBToLinear(), 1); // para WebGL (lineal)
   renderer.setRenderTarget(rt);
   renderer.clear(true, true, true);
   renderer.render(scene, camera);
- 
+
   const pixels = new Uint8Array(renderW * renderH * 4);
   renderer.readRenderTargetPixels(rt, 0, 0, renderW, renderH, pixels);
- 
+
   const tmp = document.createElement('canvas');
   tmp.width = renderW; tmp.height = renderH;
   const tctx = tmp.getContext('2d');
@@ -1630,17 +1656,17 @@ function saveImage(){
     imgData.data.set(pixels.subarray(src, src + row), dst);
   }
   tctx.putImageData(imgData, 0, 0);
- 
+
   const final = document.createElement('canvas');
   final.width = A2_W; final.height = A2_H;
   const fctx = final.getContext('2d');
- 
+
   fctx.fillStyle = clearHex;
   fctx.fillRect(0, 0, A2_W, A2_H);
   const offX = Math.floor((A2_W - renderW) / 2);
   const offY = Math.floor((A2_H - renderH) / 2);
   fctx.drawImage(tmp, offX, offY);
- 
+
   final.toBlob((blob)=>{
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1649,7 +1675,7 @@ function saveImage(){
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
   }, 'image/png');
- 
+
   renderer.setRenderTarget(prevRt);
   rt.dispose();
   renderer.setPixelRatio(prevPixelRatio);
@@ -1659,44 +1685,44 @@ function saveImage(){
   if (prevBg) scene.background = prevBg;
   controls.update();
 }
- 
- 
+
+
 function applyPalette(){
   permutationGroup.children.forEach(o=>{
     const permStr = o.userData.permStr;
     const ov = permOverride[permStr];
- 
+
     // Siempre partimos de un valor sRGB y lo convertimos a lineal
     if (chromaMode === 'HABITATED' && ov){
       setColorFromSRGBHex(o.material.color, ov);
       return;
     }
- 
+
     const pa  = permStrToArray(permStr);
     const rgb = colorForPermutation(pa);
- 
+
     // rgb es sRGB (0..255). Lo seteamos como sRGB y convertimos a lineal.
     o.material.color.setRGB(rgb[0]/255, rgb[1]/255, rgb[2]/255);
     o.material.color.convertSRGBToLinear();
   });
- 
+
     applyXRaySceneState();
   rebuildPermOverrideUI();
 }
- 
+
       function refreshAll(opts = {rebuild:false}){
   if(opts.rebuild) updateScene(false);
- 
+
   rebuildSceneColours();
- 
+
   applyPalette();
- 
+
   updateBackground(false);
   updateCubeColor(false);
- 
+
   updateChromaModeUI();
 }
- 
+
 function resetAllColours(){
   permOverride  = {};
   bgOverride    = null;
@@ -1706,64 +1732,64 @@ function resetAllColours(){
 }
 function updateBackground(manual = true){
   const input = document.getElementById("bgColor");
- 
+
   if (manual){
     const picked = normHex6(input ? input.value : null);
     if(!picked) return;
     bgOverride = picked;
     markHabited();
   }
- 
+
   // hex sRGB efectivo (lo que debe mostrar el UI)
   const hexSRGB = (chromaMode === 'HABITATED' && bgOverride)
     ? bgOverride
     : hsvToHex(bgHSV);
- 
+
   __bgHexSRGB = hexSRGB;
   if (input) input.value = hexSRGB;
- 
+
   // escena: almacenar en lineal
   scene.background = new THREE.Color(hexSRGB).convertSRGBToLinear();
- 
+
   updateRasterGridContrast();
   updateChromaModeUI();
 }
- 
+
 function updateCubeColor(manual = true){
   const input = document.getElementById("cubeColor");
- 
+
   if (manual){
     const picked = normHex6(input ? input.value : null);
     if(!picked) return;
     cubeOverride = picked;
     markHabited();
   }
- 
+
   const hexSRGB = (chromaMode === 'HABITATED' && cubeOverride)
     ? cubeOverride
     : hsvToHex(wallHSV);
- 
+
   __cubeHexSRGB = hexSRGB;
   if (input) input.value = hexSRGB;
- 
+
   // cubo: almacenar en lineal (material.color es lineal)
   setColorFromSRGBHex(cubeUniverse.material.color, hexSRGB);
- 
+
   updateChromaModeUI();
 }
- 
+
 function layoutLeftControlsPanel(){
   const panel = document.getElementById('controls');
   if(!panel) return;
- 
+
   const panelStyle = window.getComputedStyle(panel);
   if(panelStyle.display === 'none') return;
- 
+
   const panelRect = panel.getBoundingClientRect();
   const safe = Math.max(180, Math.floor(window.innerHeight - panelRect.top - 20));
   panel.style.maxHeight = safe + 'px';
 }
- 
+
     function toggleTexts(){
       const ids = [
         'controls',
@@ -1775,7 +1801,7 @@ function layoutLeftControlsPanel(){
         const e=document.getElementById(id);
         if(e) e.style.display = textsVisible ? 'none' : 'block';
       });
- 
+
       // El botón 120 (recorrer fenotipos) aparece sólo con UI oculta,
       // a la inversa que el resto de controles.
       const miniBtns = ['permNextButton'];
@@ -1783,18 +1809,18 @@ function layoutLeftControlsPanel(){
         const e = document.getElementById(id);
         if(e) e.style.display = textsVisible ? 'block' : 'none';
       });
- 
+
       document.getElementById('toggleTextButton').textContent =
         textsVisible ? 'Show UI' : 'Hide UI';
       textsVisible = !textsVisible;
- 
+
       // Asegura que el cursor personalizado vuelva a mostrarse
       const cc = document.getElementById('customCursor');
       if (cc) cc.style.display = 'block';
- 
+
       setTimeout(layoutLeftControlsPanel, 0);
     }
- 
+
     function updateMapping(){
       const v=document.getElementById('attrMapping').value.split(',').map(Number);
       if(v.length===5){
@@ -1804,10 +1830,10 @@ function layoutLeftControlsPanel(){
     }
     function applyStandardView(){
   const target = new THREE.Vector3(0,0,0);
- 
+
   const view = document.getElementById('standardView').value;
   const pos = new THREE.Vector3();
- 
+
   switch(view){
     case "isometric": pos.set(50,50,50); break;
     case "top":       pos.set(0,80,0);   break;
@@ -1816,10 +1842,10 @@ function layoutLeftControlsPanel(){
     case "diagonal":  pos.set(-50,50,-50); break;
     default:          pos.set(0,0,50);
   }
- 
+
   camera.position.copy(pos);
   camera.lookAt(target);
- 
+
   controls.enabled            = true;
   controls.enableRotate       = true;
   controls.enablePan          = true;
@@ -1829,10 +1855,10 @@ function layoutLeftControlsPanel(){
   controls.minPolarAngle      = 0;
   controls.maxPolarAngle      = Math.PI;
   controls.screenSpacePanning = false;
- 
+
   controls.update();
 }
- 
+
     function applyEmbedParams(){
       const p=new URLSearchParams(window.location.search);
       if(p.has('perms')){
@@ -1877,10 +1903,10 @@ function layoutLeftControlsPanel(){
       }
       if(p.get('hide')==='1') toggleTexts();
     }
- 
+
 function exportCurrentConfiguration(){
   const perms = Array.from(document.getElementById('permutationList').selectedOptions).map(o=>o.value);
- 
+
   const mapping = {
     forma: attributeMapping[0],
     color: attributeMapping[1],
@@ -1888,7 +1914,7 @@ function exportCurrentConfiguration(){
     y: attributeMapping[3],
     z: attributeMapping[4]
   };
- 
+
   // Colors ahora es por permutación (N entradas)
   const colors = {};
   perms.forEach(ps=>{
@@ -1897,24 +1923,24 @@ function exportCurrentConfiguration(){
     const effHex  = (chromaMode === 'HABITATED' && ovHex) ? ovHex : autoHex;
     colors[ps] = effHex;
   });
- 
+
   const bg   = normHex6(document.getElementById('bgColor').value)   || document.getElementById('bgColor').value;
   const cube = normHex6(document.getElementById('cubeColor').value) || document.getElementById('cubeColor').value;
- 
+
   const permsSorted = {};
   Object.keys(permOverride || {}).sort().forEach(ps=>{
     const hv = normHex6(permOverride[ps]);
     if(hv) permsSorted[ps] = hv;
   });
- 
+
   const overrides = {
     perms: permsSorted,
     bg: bgOverride ? normHex6(bgOverride) : null,
     cube: cubeOverride ? normHex6(cubeOverride) : null
   };
- 
+
   const view = "front";
- 
+
   return {
     perms,
     mapping,
@@ -1929,7 +1955,7 @@ function exportCurrentConfiguration(){
     overrides
   };
 }
- 
+
     function exportEmbed(){
       const config = exportCurrentConfiguration();     // ← usa la misma fuente de verdad
       const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
@@ -1940,7 +1966,7 @@ function exportCurrentConfiguration(){
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
- 
+
         function initCustomCursor(){
       const c=document.getElementById('customCursor');
       window.addEventListener('mousemove',e=>{
@@ -1950,18 +1976,18 @@ function exportCurrentConfiguration(){
     function initRenderer(){
       // Antialias + conservar buffer para exportación
       renderer = new THREE.WebGLRenderer({ antialias:true, preserveDrawingBuffer:true });
- 
+
       /* ✅ Más nitidez en BUILD:
          - Subimos el cap del pixelRatio de 1.25 → 2.0 (sin ir al máximo del dispositivo para no matar FPS).
          - ACES + exposure suave evitan “quemados” y lavados sin tocar tus colores deterministas. */
       const PR = Math.min(window.devicePixelRatio || 1, 2.0);
       renderer.setPixelRatio(PR);
       renderer.setSize(window.innerWidth, window.innerHeight);
- 
+
       renderer.outputEncoding = THREE.sRGBEncoding;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 0.95;
- 
+
       document.body.appendChild(renderer.domElement);
     }
     function init(){
@@ -1981,24 +2007,24 @@ function exportCurrentConfiguration(){
       const dir = new THREE.DirectionalLight(0xffffff, 0.85); // antes 0.5
       dir.position.set(1, 1.2, 1.5);
       scene.add(dir);
- 
+
       const cubeGeo=new THREE.BoxGeometry(cubeSize,cubeSize,cubeSize),
             cubeMat=new THREE.MeshBasicMaterial({color:0x808080,transparent:true,opacity:0.2,side:THREE.BackSide,dithering:true});
       cubeUniverse=new THREE.Mesh(cubeGeo,cubeMat);
       cubeUniverse.material.color.convertSRGBToLinear();
       scene.add(cubeUniverse);
- 
+
       rasterGridGroup = createRasterGridHelper();
       scene.add(rasterGridGroup);
- 
+
       permutationGroup=new THREE.Group();
       scene.add(permutationGroup);
- 
+
       raycaster=new THREE.Raycaster();
       mouse=new THREE.Vector2();
       window.addEventListener('mousemove',onMouseMove,false);
       window.addEventListener('resize',onWindowResize,false);
- 
+
       initCustomCursor();
       populatePermutationList();
       populateAttributeMappingSelect();
@@ -2010,7 +2036,7 @@ function exportCurrentConfiguration(){
       toggleFrontWall(true);
       toggleXRay('OFF');
       enterBuildRenderBoost();
- 
+
       // Genera la escena del ciclo de 6 días al que pertenece hoy.
       // Determinista: misma fecha → misma escena, siempre.
       // Inicializa también el calendario: rango [EPOCH, hoy].
@@ -2033,39 +2059,39 @@ function exportCurrentConfiguration(){
     }
     function animate(){
   requestAnimationFrame(animate);
- 
+
   if (!isPaused){
     permutationGroup.children.forEach(o=>{
       if (o.userData && o.userData.rotationSpeed) o.rotation.y += o.userData.rotationSpeed;
     });
   }
- 
+
   if (controls) controls.update();
   renderer.render(scene, camera);
 }
- 
- 
- 
+
+
+
       init();
- 
+
       (function WhiteWallBuildOnly(){
   const WALL_LAYER = 7;
- 
+
   function makeFrameGeometry(outer, open, thickness){
     const half = outer * 0.5;
     const h2   = open  * 0.5;
- 
+
     const shape = new THREE.Shape();
     shape.moveTo(-half, -half); shape.lineTo( half, -half);
     shape.lineTo( half,  half); shape.lineTo(-half,  half);
     shape.lineTo(-half, -half);
- 
+
     const hole = new THREE.Path();
     hole.moveTo(-h2, -h2); hole.lineTo( h2, -h2);
     hole.lineTo( h2,  h2); hole.lineTo(-h2,  h2);
     hole.lineTo(-h2, -h2);
     shape.holes.push(hole);
- 
+
     const geo = new THREE.ExtrudeGeometry(shape, {
       depth: thickness, bevelEnabled: false, steps: 1, curveSegments: 1
     });
@@ -2073,13 +2099,13 @@ function exportCurrentConfiguration(){
     geo.computeBoundingSphere(); geo.computeBoundingBox();
     return geo;
   }
- 
+
   function createWall({open=100, outer=600, thickness=15, distance=93}={}){
     const rig = new THREE.Group();
     rig.matrixAutoUpdate = false;
     rig.frustumCulled    = false;
     scene.add(rig);
- 
+
     const matFront = new THREE.MeshStandardMaterial({
       color: 0xECE9E4, roughness: 0.92, metalness: 0.0, dithering: true
     });
@@ -2088,7 +2114,7 @@ function exportCurrentConfiguration(){
     });
     matFront.color.convertSRGBToLinear();
     matJamb.color.convertSRGBToLinear();
- 
+
     // ── FIX z-fighting ───────────────────────────────────────────
     // Las jambas (BoxGeometry) y las paredes interiores del hueco de
     // la extrusión del frente ocupan el mismo rango z, lo que provoca
@@ -2097,7 +2123,7 @@ function exportCurrentConfiguration(){
     matJamb.polygonOffset       = true;
     matJamb.polygonOffsetFactor = 1;
     matJamb.polygonOffsetUnits  = 1;
- 
+
     const geo = makeFrameGeometry(outer, open, thickness);
     const frame = new THREE.Mesh(geo, matFront);
     frame.renderOrder   = 100000;
@@ -2105,7 +2131,7 @@ function exportCurrentConfiguration(){
     frame.position.set(0, 0, -distance);
     frame.layers.set(WALL_LAYER);
     rig.add(frame);
- 
+
     const h2 = open * 0.5, t = thickness, zc = -distance - t*0.5;
     const left   = new THREE.Mesh(new THREE.BoxGeometry(t, open, t), matJamb);
     const right  = new THREE.Mesh(new THREE.BoxGeometry(t, open, t), matJamb);
@@ -2118,7 +2144,7 @@ function exportCurrentConfiguration(){
     [left,right,top,bottom].forEach(m=>{
       m.renderOrder=100001; m.frustumCulled=false; m.layers.set(WALL_LAYER); rig.add(m);
     });
- 
+
     camera.layers.enable(WALL_LAYER);
     const hemi = new THREE.HemisphereLight(0xffffff, 0x888888, 0.55);
     hemi.layers.set(WALL_LAYER);
@@ -2126,7 +2152,7 @@ function exportCurrentConfiguration(){
     dir.position.set(-distance*0.8, distance*1.2, -distance*0.2);
     dir.layers.set(WALL_LAYER);
     rig.add(hemi, dir);
- 
+
     return {
       rig, frame,
       params: {open, outer, thickness, distance},
@@ -2147,15 +2173,15 @@ function exportCurrentConfiguration(){
         const t2  = this.params.thickness;
         const zc2 = -this.params.distance - t2*0.5;
         const h22 = o * 0.5;
- 
+
         const gFrame = makeFrameGeometry(this.params.outer, o, t2);
         this.frame.geometry.dispose(); this.frame.geometry = gFrame;
- 
+
         left.geometry.dispose();   left.geometry   = new THREE.BoxGeometry(t2, o, t2);
         right.geometry.dispose();  right.geometry  = new THREE.BoxGeometry(t2, o, t2);
         top.geometry.dispose();    top.geometry    = new THREE.BoxGeometry(o, t2, t2);
         bottom.geometry.dispose(); bottom.geometry = new THREE.BoxGeometry(o, t2, t2);
- 
+
         left.position.set( -h22 - t2*0.5, 0, zc2);
         right.position.set(  h22 + t2*0.5, 0, zc2);
         top.position.set(0,  h22 + t2*0.5, zc2);
@@ -2166,15 +2192,15 @@ function exportCurrentConfiguration(){
         const o  = this.params.open;
         const zc2 = -this.params.distance - t2*0.5;
         const h22 = o * 0.5;
- 
+
         const gFrame = makeFrameGeometry(this.params.outer, o, t2);
         this.frame.geometry.dispose(); this.frame.geometry = gFrame;
- 
+
         left.geometry.dispose();   left.geometry   = new THREE.BoxGeometry(t2, o, t2);
         right.geometry.dispose();  right.geometry  = new THREE.BoxGeometry(t2, o, t2);
         top.geometry.dispose();    top.geometry    = new THREE.BoxGeometry(o, t2, t2);
         bottom.geometry.dispose(); bottom.geometry = new THREE.BoxGeometry(o, t2, t2);
- 
+
         left.position.set( -h22 - t2*0.5, 0, zc2);
         right.position.set(  h22 + t2*0.5, 0, zc2);
         top.position.set(0,  h22 + t2*0.5, zc2);
@@ -2182,10 +2208,10 @@ function exportCurrentConfiguration(){
       }
     };
   }
- 
+
   const wall = createWall({open:100, outer:600, thickness:15, distance:93});
   wall.setVisible(frontWallVisible);
- 
+
   (function tick(){
     try{
       wall.rig.position.copy(camera.position);
@@ -2194,7 +2220,7 @@ function exportCurrentConfiguration(){
     }catch(_){ }
     requestAnimationFrame(tick);
   })();
- 
+
   window.WW = {
     get(){ return wall; },
     setDistance(d){ wall.setDistance(d); },
@@ -2208,12 +2234,12 @@ function exportCurrentConfiguration(){
       return { dir, backCenter, distance:d, thickness:t };
     }
   };
- 
+
   window.WW_applyFor = function(){ wall.setVisible(frontWallVisible); };
 })();
 ;
- 
+
 </script>
- 
+
 </body>
 </html>
