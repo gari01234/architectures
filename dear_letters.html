@@ -323,6 +323,24 @@
       return formatDateSeed(cycleStartDate(k));
     }
 
+    // ── Regla canónica de fertilidad (Q3) ──────────────────────────
+    //
+    //   Cuántas permutaciones engendra una fecha. Universal a las cinco
+    //   obras de Dear:. Nace de la fecha misma (no de un oráculo):
+    //
+    //     fertilidad = 1 + ( [ rdig(día)·rdig(mes)·rdig(sumaCifrasAño)
+    //                          + día + mes ] mod 24 )
+    //
+    //   rdig = raíz digital (reducir a un dígito sumando cifras).
+    function rdig(n) { n = Math.abs(n); if (n === 0) return 0; const r = n % 9; return r === 0 ? 9 : r; }
+    function sumaCifrasAnio(y) { return String(y).split('').reduce((a, b) => a + (+b), 0); }
+    function fertility(date) {
+      const dia = date.getDate(), mes = date.getMonth() + 1;
+      const sY = sumaCifrasAnio(date.getFullYear());
+      const k = rdig(dia) * rdig(mes) * rdig(sY) + dia + mes;
+      return 1 + (((k % 24) + 24) % 24);
+    }
+
     // ── Selección de letras del ciclo ──────────────────────────────
     //
     //   N letras entre 1 y 25, sin repetición dentro del ciclo.
@@ -330,8 +348,8 @@
     //   letras del alfabeto y se toman las primeras N.
     function lettersForCycle(k) {
       const seed = cycleSeedString(k);
-      const rngN = mulberry32(hashString("n:" + seed));
-      const n = MIN_LETTERS_PER_CYCLE + Math.floor(rngN() * MAX_LETTERS_PER_CYCLE);
+      // N letras = fertilidad canónica (Q3) del primer día del ciclo.
+      const n = fertility(cycleStartDate(k));
 
       // Barajado determinista del alfabeto con la semilla del ciclo
       const rngShuffle = mulberry32(hashString("shuffle:" + seed));
