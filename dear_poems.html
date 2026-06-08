@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dear: Poems</title>
-
+ 
   <style>
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; }
-
+ 
     body {
       margin: 0;
       overflow: hidden;
@@ -18,7 +18,7 @@
       font-weight: 200;
       font-size: 12px;
     }
-
+ 
     #app {
       position: fixed;
       inset: 0;
@@ -26,14 +26,14 @@
       place-items: center;
       background: #ffffff;
     }
-
+ 
     #plan {
       width: min(96vmin, calc(100vw - 36px));
       height: min(96vmin, calc(100vh - 36px));
       display: block;
       background: #ffffff;
     }
-
+ 
     button {
       position: fixed;
       z-index: 260;
@@ -49,9 +49,9 @@
       cursor: pointer;
       transition: background .2s;
     }
-
+ 
     button:hover { background: rgba(0,0,0,0.14); }
-
+ 
     #dayTitle {
       position: fixed;
       top: 16px;
@@ -62,7 +62,7 @@
       pointer-events: none;
       user-select: none;
     }
-
+ 
     #pieceTitle {
       font-family: Futura, "Futura PT", "Century Gothic", "Avenir Next", Avenir, sans-serif;
       font-weight: 400;
@@ -70,7 +70,7 @@
       letter-spacing: 0.18em;
       color: rgba(0,0,0,0.32);
     }
-
+ 
     #toggleUIButton {
       left: 10px;
       bottom: 10px;
@@ -85,12 +85,12 @@
       text-transform: none;
       transition: color 0.2s;
     }
-
+ 
     #toggleUIButton:hover {
       background: transparent;
       color: #111111;
     }
-
+ 
     #uiPanel {
       position: fixed;
       left: 10px;
@@ -109,45 +109,45 @@
       border: 1px solid rgba(0,0,0,0.10);
       box-shadow: 0 8px 24px rgba(0,0,0,0.06);
     }
-
+ 
     #uiPanel.open { display: block; }
-
+ 
     #uiPanel::-webkit-scrollbar { width: 10px; }
     #uiPanel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 8px; }
     #uiPanel::-webkit-scrollbar-track { background: rgba(255,255,255,0.06); }
-
+ 
     details {
       margin-bottom: 10px;
       background: rgba(255,255,255,0.32);
       padding: 8px 10px;
       border-radius: 3px;
     }
-
+ 
     details summary {
       font-weight: 200;
       cursor: pointer;
       margin-bottom: 6px;
       user-select: none;
     }
-
+ 
     .row {
       display: grid;
       gap: 6px;
       margin-bottom: 10px;
     }
-
+ 
     .row label {
       font-size: 12px;
       color: rgba(0,0,0,0.42);
     }
-
+ 
     .panelButton {
       position: static;
       width: 100%;
       margin-top: 4px;
       background: rgba(0,0,0,0.08);
     }
-
+ 
     .stats {
       color: rgba(0,0,0,0.42);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -157,41 +157,41 @@
     }
   </style>
 </head>
-
+ 
 <body>
   <header id="dayTitle">
     <div id="pieceTitle">Dear: Poems</div>
   </header>
-
+ 
   <main id="app">
     <svg id="plan" viewBox="0 0 1600 1600" role="img" aria-label="Planta del día"></svg>
   </main>
-
+ 
   <button id="toggleUIButton" type="button">Show UI</button>
-
+ 
   <aside id="uiPanel">
     <details open>
       <summary>Dear: Poems</summary>
-
+ 
       <div class="row">
         <label for="dateInput">date</label>
         <input id="dateInput" type="date" />
       </div>
-
+ 
       <button id="todayButton" class="panelButton" type="button">today</button>
       <button id="exportButton" class="panelButton" type="button">export A3 (PNG)</button>
     </details>
-
+ 
     <details>
       <summary>structure</summary>
       <div class="stats" id="stats"></div>
     </details>
   </aside>
-
+ 
   <script>
   (function () {
     "use strict";
-
+ 
     // ════════════════════════════════════════════════════════════════
     //  Dear: Poems
     //
@@ -223,7 +223,7 @@
     //
     //  Las palabras no nombran, residen. Arquitecturas para poemas.
     // ════════════════════════════════════════════════════════════════
-
+ 
     // ── Vocabulario cerrado: cinco tipos de cuarto ─────────────────
     const ROOM_TYPES = [
       { key: "bath",    label: "bath" },
@@ -232,7 +232,7 @@
       { key: "bedroom", label: "bedroom" },
       { key: "dining",  label: "dining" }
     ];
-
+ 
     // ── Sistema literario: poema de cinco versos por recinto ───────
     //
     //   Cuatro vocabularios de cinco palabras cada uno. El poema tiene
@@ -264,13 +264,13 @@
     //   Las 120 permutaciones producen 120 poemas únicos.
     const VOCAB_BODY   = ["skin",   "throat",  "tongue",  "finger",  "lung"];
     const VOCAB_ROOMS  = ["bath",   "kitchen", "living",  "bedroom", "dining"];
-    const VOCAB_MATTER = ["chalk",  "glass",   "bone",    "stone",   "ash"];
+    const VOCAB_MATTER = ["chalk",  "glass",   "bone",    "stone",   "gold"];
     const VOCAB_TRACE  = ["fold",   "mark",    "trace",   "blank",   "silence"];
-
+ 
     // Etiquetas de los cuatro vocabularios, para identificar versos.
     // El silencio se marca con "_" y se renderiza como línea vacía.
     const VOCAB_LABELS = ["B", "R", "M", "T"];  // body, rooms, matter, trace
-
+ 
     // Los 24 órdenes posibles de cuatro elementos {B, R, M, T}.
     // Cada permutación de 5 dígitos selecciona uno de estos 24
     // órdenes vía lehmerRank(perm) mod 24.
@@ -284,12 +284,12 @@
       ["T","B","R","M"], ["T","B","M","R"], ["T","R","B","M"],
       ["T","R","M","B"], ["T","M","B","R"], ["T","M","R","B"]
     ];
-
+ 
     // Devuelve un array de 5 strings: cuatro palabras + un "_" para el
     // silencio inscrito. La posición del "_" la decide P5.
     function poemFromPerm(perm) {
       const p1 = perm[0], p2 = perm[1], p3 = perm[2], p4 = perm[3], p5 = perm[4];
-
+ 
       // Las cuatro palabras vienen de los cuatro vocabularios, en sus
       // posiciones fijas (P1→cuerpo, P2→cuartos, P3→materia, P4→huella).
       const slots = {
@@ -298,14 +298,14 @@
         M: VOCAB_MATTER[(p3 - 1) % 5],
         T: VOCAB_TRACE[(p4 - 1) % 5]
       };
-
+ 
       // El orden de las cuatro palabras lo decide el Lehmer rank de
       // la permutación entera, módulo 24. Misma permutación → mismo
       // orden, preservando la lógica de Phrases.
       const orderIdx = lehmerRank(perm) % VERSE_ORDERS.length;
       const order = VERSE_ORDERS[orderIdx];
       const fourVerses = order.map(k => slots[k]);
-
+ 
       // El silencio se inserta en la línea P5 (1 a 5). El silencio
       // puede caer en cualquiera de las cinco líneas, produciendo
       // tres modos de poema:
@@ -318,7 +318,7 @@
       // Las tres formas son distintas, ninguna mejor que otra.
       // La pieza opera en los tres modos a lo largo del calendario.
       const silenceIdx = (p5 - 1) % 5;
-
+ 
       const lines = new Array(5);
       lines[silenceIdx] = "_";
       let vi = 0;
@@ -328,12 +328,12 @@
       }
       return lines;
     }
-
+ 
     // ── Grilla 5×5 ─────────────────────────────────────────────────
     const GRID = 5;
     const SVG_SIZE = 1600;
     const SVG_NS = "http://www.w3.org/2000/svg";
-
+ 
     // ── Universo de permutaciones de {1,2,3,4,5} ───────────────────
     function getAllPermutations(arr) {
       if (arr.length === 1) return [arr];
@@ -346,10 +346,10 @@
     }
     const ALL_PERMS = getAllPermutations([1, 2, 3, 4, 5]);     // 120
     const ALL_MAPPINGS = getAllPermutations([0, 1, 2, 3, 4]);  // 120
-
+ 
     // ── Operaciones canónicas ──────────────────────────────────────
     const FACT = [1, 1, 2, 6, 24, 120];
-
+ 
     function lehmerRank(p) {
       let r = 0;
       for (let i = 0; i < p.length; i++) {
@@ -359,11 +359,11 @@
       }
       return r;
     }
-
+ 
     function mappingRank(m) {
       return lehmerRank([m[0] + 1, m[1] + 1, m[2] + 1, m[3] + 1, m[4] + 1]);
     }
-
+ 
     // ── Hash determinista de cadena → semilla numérica ─────────────
     function hashString(str) {
       let h = 2166136261 >>> 0;
@@ -373,7 +373,7 @@
       }
       return h >>> 0;
     }
-
+ 
     function mulberry32(seed) {
       let t = seed >>> 0;
       return function () {
@@ -383,7 +383,7 @@
         return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
       };
     }
-
+ 
     // ── Selección determinista de N permutaciones ──────────────────
     //   La semilla del rng deriva de la cadena de entrada.
     //   Misma cadena → mismas permutaciones, siempre.
@@ -399,14 +399,14 @@
       }
       return out;
     }
-
+ 
     // ── Invariante de escena: globalShift ──────────────────────────
     function computeGlobalShift(perms, m) {
       let sumR = 0;
       perms.forEach(p => { sumR += lehmerRank(p); });
       return (sumR + mappingRank(m)) % (GRID * GRID);
     }
-
+ 
     // ── Proyección permutación → cuarto ────────────────────────────
     //
     //   Mapping m = permutación de {0,1,2,3,4} que asigna posiciones
@@ -428,16 +428,16 @@
       const h = perm[m[2]];
       const xBase = (perm[m[3]] - 1);
       const yBase = (perm[m[4]] - 1);
-
+ 
       const sx = globalShift % GRID;
       const sy = Math.floor(globalShift / GRID) % GRID;
-
+ 
       const x = (xBase + sx) % GRID;
       const y = (yBase + sy) % GRID;
-
+ 
       const wClipped = Math.min(w, GRID - x);
       const hClipped = Math.min(h, GRID - y);
-
+ 
       return {
         perm: perm,
         rank: r,
@@ -447,11 +447,11 @@
         w: wClipped, h: hClipped
       };
     }
-
+ 
     function projectHouse(perms, m, globalShift) {
       return perms.map(p => projectRoom(p, m, globalShift));
     }
-
+ 
     // ── Detección de colisiones ────────────────────────────────────
     function roomsOverlap(a, b) {
       return !(a.x + a.w <= b.x ||
@@ -459,7 +459,7 @@
                a.y + a.h <= b.y ||
                b.y + b.h <= a.y);
     }
-
+ 
     function houseHasCollisions(rooms) {
       for (let i = 0; i < rooms.length; i++) {
         for (let j = i + 1; j < rooms.length; j++) {
@@ -468,7 +468,7 @@
       }
       return false;
     }
-
+ 
     // ── Búsqueda determinista de mapping sin colisión ──────────────
     function findValidMapping(perms) {
       for (let mi = 0; mi < ALL_MAPPINGS.length; mi++) {
@@ -481,7 +481,7 @@
       }
       return null;
     }
-
+ 
     // ── Generador de casa (estilo Strachey / PRMTTN) ───────────────
     //
     //   Para una semilla y un n, intentamos encontrar una casa
@@ -502,17 +502,17 @@
     //   las variaciones ni el descenso de n. Solo aparece la casa.
     function generateHouse(seed, requestedN) {
       const MAX_VARIATIONS = 100;
-
+ 
       for (let n = requestedN; n >= 1; n--) {
         for (let v = 0; v <= MAX_VARIATIONS; v++) {
           const effectiveSeed = v === 0
             ? seed + ":n=" + n
             : seed + ":n=" + n + ":v=" + v;
-
+ 
           const rng = mulberry32(hashString(effectiveSeed));
           const perms = pickPermutations(rng, n);
           const found = findValidMapping(perms);
-
+ 
           if (found) {
             return {
               perms: perms,
@@ -527,10 +527,10 @@
           }
         }
       }
-
+ 
       return null;  // matemáticamente imposible (n=1 siempre cabe)
     }
-
+ 
     // ── Cálculo de puertas ─────────────────────────────────────────
     //
     //   Una puerta por cada par de cuartos adyacentes (que comparten
@@ -538,11 +538,11 @@
     //   al exterior en su lado más largo.
     function computeDoors(rooms) {
       const shared = [];
-
+ 
       for (let i = 0; i < rooms.length; i++) {
         for (let j = i + 1; j < rooms.length; j++) {
           const A = rooms[i], B = rooms[j];
-
+ 
           // Pared vertical compartida
           if (A.x + A.w === B.x || B.x + B.w === A.x) {
             const yStart = Math.max(A.y, B.y);
@@ -559,7 +559,7 @@
               });
             }
           }
-
+ 
           // Pared horizontal compartida
           if (A.y + A.h === B.y || B.y + B.h === A.y) {
             const xStart = Math.max(A.x, B.x);
@@ -578,7 +578,7 @@
           }
         }
       }
-
+ 
       // Por pareja: si comparten más de un segmento, quedarnos con el más largo.
       const longestByPair = new Map();
       shared.forEach(s => {
@@ -586,12 +586,12 @@
         const prev = longestByPair.get(key);
         if (!prev || s.len > prev.len) longestByPair.set(key, s);
       });
-
+ 
       const doors = [];
       longestByPair.forEach(s => {
         doors.push(makeDoorFromSegment(s));
       });
-
+ 
       // Componentes conexos por adyacencia (union-find).
       // Cada componente debe tener al menos una puerta al exterior;
       // de lo contrario sus cuartos quedan atrapados.
@@ -605,14 +605,14 @@
         if (ra !== rb) parent[ra] = rb;
       }
       longestByPair.forEach(s => unite(s.a, s.b));
-
+ 
       const components = new Map();
       rooms.forEach((R, i) => {
         const root = find(i);
         if (!components.has(root)) components.set(root, []);
         components.get(root).push(i);
       });
-
+ 
       // Para cada componente, asegurar una puerta al exterior.
       // Elegimos el cuarto del componente con el lado exterior más
       // largo que dé al vacío de la grilla, y le añadimos puerta ahí.
@@ -620,20 +620,20 @@
         const exteriorDoor = pickBestExteriorDoor(rooms, members);
         if (exteriorDoor) doors.push(exteriorDoor);
       });
-
+ 
       return doors;
     }
-
+ 
     // Para un componente (lista de índices de cuartos), elegir la mejor
     // puerta al exterior: el lado más largo de cualquier cuarto del
     // componente que dé al vacío (no toque otro cuarto del componente
     // o de cualquier otro). Retorna null si no se encuentra.
     function pickBestExteriorDoor(rooms, members) {
       let best = null;
-
+ 
       members.forEach(idx => {
         const R = rooms[idx];
-
+ 
         // Cuatro lados candidatos: top, bottom, left, right
         // Para cada lado, recorrer celda por celda y encontrar los
         // tramos que dan al vacío de la grilla (no a otro cuarto).
@@ -643,14 +643,14 @@
           { name: "left",   side: "vertical",   xWall: R.x,         yStart: R.y, yEnd: R.y + R.h, isOutwardX: -1 },
           { name: "right",  side: "vertical",   xWall: R.x + R.w,   yStart: R.y, yEnd: R.y + R.h, isOutwardX: +1 }
         ];
-
+ 
         sides.forEach(sd => {
           // Recorrer celda por celda y agrupar segmentos contiguos
           // donde el lado exterior cae fuera de la grilla o en celda
           // no ocupada por otro cuarto.
           let segs = [];
           let curStart = null;
-
+ 
           if (sd.side === "horizontal") {
             const outY = sd.yWall + (sd.isOutwardY < 0 ? -1 : 0);
             // outY < 0 → fuera de la grilla; outY >= GRID → fuera
@@ -663,7 +663,7 @@
               }
             }
             if (curStart !== null) segs.push([curStart, sd.xEnd]);
-
+ 
             segs.forEach(([s, e]) => {
               const len = e - s;
               if (!best || len > best.len) {
@@ -691,7 +691,7 @@
               }
             }
             if (curStart !== null) segs.push([curStart, sd.yEnd]);
-
+ 
             segs.forEach(([s, e]) => {
               const len = e - s;
               if (!best || len > best.len) {
@@ -711,10 +711,10 @@
           }
         });
       });
-
+ 
       return best ? best.door : null;
     }
-
+ 
     // ¿La celda (x,y) está ocupada por algún cuarto?
     function cellOccupied(rooms, x, y) {
       for (const R of rooms) {
@@ -722,10 +722,10 @@
       }
       return false;
     }
-
+ 
     // Tamaño de puerta uniforme, expresado en unidades de celda.
     const DOOR_LEN = 0.4;
-
+ 
     function makeDoorFromSegment(seg) {
       const doorLen = Math.min(DOOR_LEN, seg.len * 0.8);
       const mid = (seg.start + seg.end) / 2;
@@ -745,7 +745,7 @@
         };
       }
     }
-
+ 
     function makeExteriorDoor(R) {
       const doorLen = Math.min(DOOR_LEN, Math.min(R.w, R.h) * 0.8);
       if (R.w >= R.h) {
@@ -766,32 +766,32 @@
         };
       }
     }
-
+ 
     // ── Render SVG ─────────────────────────────────────────────────
     const planEl = document.getElementById("plan");
-
+ 
     function createSvg(name, attrs) {
       const node = document.createElementNS(SVG_NS, name);
       Object.keys(attrs || {}).forEach(k => node.setAttribute(k, attrs[k]));
       return node;
     }
-
+ 
     function drawPlan(house) {
       planEl.innerHTML = "";
-
+ 
       const margin = 120;
       const available = SVG_SIZE - margin * 2;
       const cell = available / GRID;
       const ox = (SVG_SIZE - cell * GRID) / 2;
       const oy = (SVG_SIZE - cell * GRID) / 2;
-
+ 
       // fondo
       planEl.appendChild(createSvg("rect", {
         x: 0, y: 0, width: SVG_SIZE, height: SVG_SIZE, fill: "#ffffff"
       }));
-
+ 
       if (!house) return;
-
+ 
       // cuartos: relleno blanco sólido
       house.rooms.forEach(room => {
         planEl.appendChild(createSvg("rect", {
@@ -802,7 +802,7 @@
           fill: "#ffffff"
         }));
       });
-
+ 
       // muros negros gruesos
       const wallW = Math.max(6, cell * 0.045);
       house.rooms.forEach(room => {
@@ -818,10 +818,10 @@
           "stroke-linejoin": "miter"
         }));
       });
-
+ 
       // puertas
       drawDoors(planEl, house, ox, oy, cell, wallW);
-
+ 
       // etiquetas: un poema determinista de cinco líneas por recinto,
       // derivado de la permutación. Cuatro palabras + un silencio
       // inscrito (línea vacía del alto de una línea tipográfica).
@@ -832,9 +832,9 @@
         const cy = oy + (room.y + room.h / 2) * cell;
         const fontSize = cell * 0.10;
         const lineHeight = fontSize * 1.5;
-
+ 
         const lines = poemFromPerm(room.perm);
-
+ 
         // ¿Cabe el poema entero (5 líneas, considerando la más larga
         // de las palabras visibles) en este recinto?
         const visibleWords = lines.filter(w => w !== "_");
@@ -844,10 +844,10 @@
         const roomW = room.w * cell;
         const roomH = room.h * cell;
         const minMargin = wallW * 1.5;
-
+ 
         if (textW > roomW - minMargin * 2) return;
         if (textH > roomH - minMargin * 2) return;
-
+ 
         // Dibujar cada línea. Si la línea es "_" (silencio inscrito),
         // se omite el elemento <text> pero la posición vertical se
         // mantiene: la columna siempre ocupa 5 líneas de altura.
@@ -869,11 +869,11 @@
         });
       });
     }
-
+ 
     function drawDoors(svg, house, ox, oy, cell, wallW) {
       const doors = computeDoors(house.rooms);
       const doorThickness = wallW * 1.2;
-
+ 
       doors.forEach(d => {
         if (d.side === "vertical") {
           svg.appendChild(createSvg("rect", {
@@ -896,7 +896,7 @@
         }
       });
     }
-
+ 
     // ── Panel de estructura (oculto por defecto) ───────────────────
     function renderStats(seed, house) {
       const target = document.getElementById("stats");
@@ -904,7 +904,7 @@
         target.textContent = "semilla: " + seed + "\n(sin casa)";
         return;
       }
-
+ 
       const lines = [
         "semilla: " + seed,
         "grilla: " + GRID + "×" + GRID,
@@ -925,18 +925,18 @@
       });
       target.textContent = lines.join("\n");
     }
-
+ 
     // ── UI mínima ──────────────────────────────────────────────────
     const dateInput = document.getElementById("dateInput");
     const todayButton = document.getElementById("todayButton");
     const toggleUIButton = document.getElementById("toggleUIButton");
     const uiPanel = document.getElementById("uiPanel");
     const pieceTitleEl = document.getElementById("pieceTitle");
-
+ 
     let currentHouse = null;
     let currentSeed = null;
     let currentDate = null;
-
+ 
     // ── Fechas ─────────────────────────────────────────────────────
     //
     //   La fecha es la semilla. Sin transformación. Formato:
@@ -951,18 +951,18 @@
       "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
       "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
     ];
-
+ 
     // Fecha cero del sistema Dear: Architectures.
     // El proyecto entero comenzó el 16 de mayo de 2026.
     const EPOCH = new Date(2026, 4, 16);  // mes 4 = mayo (0-indexed)
-
+ 
     function formatDateSeed(date) {
       const m = MONTH_NAMES[date.getMonth()];
       const d = date.getDate();
       const y = date.getFullYear();
       return m + "." + d + "." + y;
     }
-
+ 
     // ── Regla canónica de fertilidad (Q3) ──────────────────────────
     //
     //   Cuántas permutaciones engendra una fecha. Universal a las cinco
@@ -980,7 +980,7 @@
       const k = rdig(dia) * rdig(mes) * rdig(sY) + dia + mes;
       return 1 + (((k % 24) + 24) % 24);
     }
-
+ 
     function formatDateISO(date) {
       // Para el <input type="date">: yyyy-mm-dd
       const y = date.getFullYear();
@@ -988,7 +988,7 @@
       const d = String(date.getDate()).padStart(2, "0");
       return y + "-" + m + "-" + d;
     }
-
+ 
     function parseDateISO(s) {
       // Parsea yyyy-mm-dd como fecha local (no UTC).
       const parts = s.split("-");
@@ -996,20 +996,20 @@
                       parseInt(parts[1], 10) - 1,
                       parseInt(parts[2], 10));
     }
-
+ 
     function dateIsAfter(a, b) {
       // ¿a es estrictamente posterior a b en términos de día?
       const A = new Date(a.getFullYear(), a.getMonth(), a.getDate());
       const B = new Date(b.getFullYear(), b.getMonth(), b.getDate());
       return A.getTime() > B.getTime();
     }
-
+ 
     function dateIsBefore(a, b) {
       const A = new Date(a.getFullYear(), a.getMonth(), a.getDate());
       const B = new Date(b.getFullYear(), b.getMonth(), b.getDate());
       return A.getTime() < B.getTime();
     }
-
+ 
     // ── Generación de la casa del día ──────────────────────────────
     //
     //   El número de cuartos también deriva determinísticamente
@@ -1017,7 +1017,7 @@
     function generate(date) {
       currentDate = date;
       const seed = formatDateSeed(date);
-
+ 
       // N pedido = fertilidad canónica (Q3, rango 1..24) mapeada
       // proporcionalmente a la escala de la casa-poema (1..7). Así la
       // fertilidad del día se SIENTE en el tamaño de la casa: días de
@@ -1026,23 +1026,23 @@
       // el tope del rango. generateHouse baja desde este N buscando la
       // mayor casa válida.
       const n = Math.max(1, Math.round(fertility(date) * 7 / 24));
-
+ 
       const house = generateHouse(seed, n);
       currentHouse = house;
       currentSeed = seed;
-
+ 
       pieceTitleEl.textContent = "Dear: Poems — " + seed;
       document.title = "Dear: Poems — " + seed;
-
+ 
       drawPlan(house);
       renderStats(seed, house);
     }
-
+ 
     function toggleUI() {
       const isOpen = uiPanel.classList.toggle("open");
       toggleUIButton.textContent = isOpen ? "Hide UI" : "Show UI";
     }
-
+ 
     // El usuario puede navegar entre la fecha cero (EPOCH) y hoy.
     // Ni antes (la obra no existía) ni después (el día no ha llegado).
     function onDateChange() {
@@ -1062,13 +1062,13 @@
       }
       generate(chosen);
     }
-
+ 
     function goToToday() {
       const today = new Date();
       dateInput.value = formatDateISO(today);
       generate(today);
     }
-
+ 
     // ── Exportar a PNG A3 vertical de alta calidad ─────────────────
     //
     //   Genera dos imágenes con la fecha del día como identificador:
@@ -1085,7 +1085,7 @@
         return new Promise(r => setTimeout(r, 350)).then(() => buildAndDownloadA3(false));
       });
     }
-
+ 
     function buildAndDownloadA3(withTexts) {
       const DPI = 600;
       const MM_PER_INCH = 25.4;
@@ -1093,23 +1093,23 @@
       const A3_H_MM = 420;
       const pxW = Math.round(A3_W_MM / MM_PER_INCH * DPI);
       const pxH = Math.round(A3_H_MM / MM_PER_INCH * DPI);
-
+ 
       const VB_W = A3_W_MM * 10;
       const VB_H = A3_H_MM * 10;
       const svgNS = SVG_NS;
-
+ 
       const svg = document.createElementNS(svgNS, "svg");
       svg.setAttribute("xmlns", svgNS);
       svg.setAttribute("viewBox", "0 0 " + VB_W + " " + VB_H);
       svg.setAttribute("width", pxW);
       svg.setAttribute("height", pxH);
-
+ 
       const bg = document.createElementNS(svgNS, "rect");
       bg.setAttribute("x", 0); bg.setAttribute("y", 0);
       bg.setAttribute("width", VB_W); bg.setAttribute("height", VB_H);
       bg.setAttribute("fill", "#ffffff");
       svg.appendChild(bg);
-
+ 
       const planMaxW = VB_W * 0.80;
       const planMaxH = VB_H * 0.65;
       const planSize = Math.min(planMaxW, planMaxH);
@@ -1117,9 +1117,9 @@
       const ox = (VB_W - cell * GRID) / 2;
       // Si no hay textos, centramos verticalmente la planta.
       const oy = withTexts ? (VB_H * 0.15) : ((VB_H - cell * GRID) / 2);
-
+ 
       drawPlanInto(svg, currentHouse, ox, oy, cell, svgNS);
-
+ 
       if (withTexts) {
         const permLines = currentHouse.perms.map(p => "(" + p.join(",") + ")");
         const permsText = permLines.join("  ");
@@ -1127,11 +1127,11 @@
         const footLeading  = footFontSize * 1.5;
         const footRightMargin  = 200;
         const footBottomMargin = 200;
-
+ 
         const titleY = VB_H - footBottomMargin - footLeading;
         const permsY = VB_H - footBottomMargin;
         const footX  = VB_W - footRightMargin;
-
+ 
         const titleEl = document.createElementNS(svgNS, "text");
         titleEl.setAttribute("x", footX);
         titleEl.setAttribute("y", titleY);
@@ -1143,7 +1143,7 @@
         titleEl.setAttribute("letter-spacing", "0.08em");
         titleEl.textContent = "DEAR: POEMS — " + currentSeed;
         svg.appendChild(titleEl);
-
+ 
         const footer = document.createElementNS(svgNS, "text");
         footer.setAttribute("x", footX);
         footer.setAttribute("y", permsY);
@@ -1156,11 +1156,11 @@
         footer.textContent = permsText;
         svg.appendChild(footer);
       }
-
+ 
       const xml = new XMLSerializer().serializeToString(svg);
       const svg64 = btoa(unescape(encodeURIComponent(xml)));
       const dataUrl = "data:image/svg+xml;base64," + svg64;
-
+ 
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = function () {
@@ -1191,7 +1191,7 @@
         img.src = dataUrl;
       });
     }
-
+ 
     // Render reutilizable: dibuja la planta en cualquier SVG dado.
     function drawPlanInto(svgEl, house, ox, oy, cell, ns) {
       // cuartos: fondo blanco
@@ -1204,9 +1204,9 @@
         r.setAttribute("fill", "#ffffff");
         svgEl.appendChild(r);
       });
-
+ 
       const wallW = Math.max(6, cell * 0.045);
-
+ 
       // muros
       house.rooms.forEach(room => {
         const r = document.createElementNS(ns, "rect");
@@ -1221,7 +1221,7 @@
         r.setAttribute("stroke-linejoin", "miter");
         svgEl.appendChild(r);
       });
-
+ 
       // puertas
       const doors = computeDoors(house.rooms);
       const doorThickness = wallW * 1.2;
@@ -1242,7 +1242,7 @@
         r.setAttribute("stroke", "none");
         svgEl.appendChild(r);
       });
-
+ 
       // etiquetas: poema determinista de cinco líneas por recinto,
       // cuatro palabras + un silencio inscrito (línea vacía). La
       // altura total de la columna es siempre 5 líneas. Si no cabe,
@@ -1252,9 +1252,9 @@
         const cy = oy + (room.y + room.h / 2) * cell;
         const fontSize = cell * 0.10;
         const lineHeight = fontSize * 1.5;
-
+ 
         const lines = poemFromPerm(room.perm);
-
+ 
         const visibleWords = lines.filter(w => w !== "_");
         const longestWord = visibleWords.reduce((a, b) => a.length > b.length ? a : b);
         const textW = longestWord.length * fontSize * 0.65;
@@ -1262,10 +1262,10 @@
         const roomW = room.w * cell;
         const roomH = room.h * cell;
         const minMargin = wallW * 1.5;
-
+ 
         if (textW > roomW - minMargin * 2) return;
         if (textH > roomH - minMargin * 2) return;
-
+ 
         const startY = cy - (lineHeight * (lines.length - 1)) / 2;
         lines.forEach((w, i) => {
           if (w === "_") return;  // silencio: línea totalmente vacía
@@ -1284,12 +1284,12 @@
         });
       });
     }
-
+ 
     toggleUIButton.addEventListener("click", toggleUI);
     todayButton.addEventListener("click", goToToday);
     dateInput.addEventListener("change", onDateChange);
     document.getElementById("exportButton").addEventListener("click", exportA3);
-
+ 
     // Inicializar con la fecha de hoy. Bloquear navegación fuera
     // del rango [EPOCH, hoy] en el calendario nativo del input.
     (function init() {
