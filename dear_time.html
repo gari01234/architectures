@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dear: Time</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- iOS: al guardar en pantalla de inicio, abrir sin barra (pantalla completa real). -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <style>
+    :root{
+      --bg:#000000;
+      --ink:#ECE9E4;
+      --faint:rgba(236,233,228,0.30);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{
+      width:100%;height:100%;
+      background:var(--bg);
+      color:var(--ink);
+      overflow:hidden;
+      font-family: Futura, "Futura PT", "Century Gothic", "Avenir Next", Avenir, sans-serif;
+      font-weight:400;
+      -webkit-font-smoothing:antialiased;
+    }
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:none;
+    }
+
+    /* La retícula 5×5: los cinco números viven en la fila central. */
+    #clock{
+      display:grid;
+      grid-template-columns:repeat(5, 1fr);
+      grid-template-rows:repeat(5, 1fr);
+      width:min(86vw, 86vh);
+      height:min(86vw, 86vh);
+    }
+    /* Cada número ocupa una celda de la fila central (fila 3, columnas 1..5). */
+    .digit{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:min(11vw, 11vh);
+      letter-spacing:0.04em;
+      user-select:none;
+      line-height:1;
+    }
+
+    /* Cursor personalizado, como en el resto del sistema. */
+    #cursor{
+      position:fixed; top:0; left:0;
+      width:7px; height:7px; border-radius:50%;
+      background:var(--ink);
+      pointer-events:none; z-index:50;
+      transform:translate(-50%,-50%);
+      mix-blend-mode:difference;
+    }
+
+    /* Botón de pantalla completa, abajo-derecha, discreto. */
+    #fullscreenButton{
+      position:fixed; right:10px; bottom:10px; z-index:60;
+      border:none; border-radius:4px; padding:8px 12px;
+      font-family:inherit; font-weight:400; font-size:12px;
+      letter-spacing:0.06em;
+      background:rgba(236,233,228,0.10); color:var(--ink);
+      cursor:none; transition:background .2s;
+    }
+    #fullscreenButton:hover{ background:rgba(236,233,228,0.20); }
+  </style>
+</head>
+<body>
+  <div id="cursor"></div>
+
+  <div id="clock">
+    <!-- 25 celdas; sólo las cinco de la fila central llevarán número. -->
+  </div>
+
+  <button id="fullscreenButton" onclick="toggleFullscreen()">⛶</button>
+
+  <script>
+  /* ================================================================
+   *  DEAR: TIME
+   *  Cinco números (1..5), cada uno contando 1→2→3→4→5→1 a su propia
+   *  velocidad, derivada de las cinco permutaciones del día natal.
+   *  Cada número además "respira": corre un tramo, se detiene un tramo.
+   *  Cuando se detiene, se congela en su valor.
+   *  El reloj corre AFUERA: su estado se calcula desde el tiempo real
+   *  transcurrido desde la medianoche del día natal (22 jun 2026), el
+   *  primer día cuya fertilidad (regla canónica Q3) es exactamente 5.
+   *  Se suelta una vez y corre indefinidamente. Determinista.
+   * ================================================================ */
+
+  // ── Origen del sistema y día natal ──────────────────────────────
+  const EPOCH = new Date(2026, 4, 16);            // 16 may 2026, origen Dear:
+  // Día natal de Time: medianoche del 22 jun 2026 (primer día Q3 == 5).
+  // Anclado a hora local del dispositivo (el tiempo "afuera" del espectador).
+  const BIRTH = new Date(2026, 5, 22, 0, 0, 0, 0);
+
+  // ── Núcleo determinista compartido del sistema ──────────────────
+  const MONTH_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN",
+                      "JUL","AUG","SEP","OCT","NOV","DEC"];
+
+  // hashString / formatDateSeed / seed: idénticos al resto de Dear:,
+  // para que Time beba de la misma semilla raíz que las demás obras.
+  function hashString(str){
+    let h = 2166136261 >>> 0;
+    for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h,16777619); }
+    return h >>> 0;
+  }
+  function formatDateSeed(date){
+    return MONTH_ABBR[date.getMonth()] + "." + date.getDate() + "." + date.getFullYear();
+  }
+  function seedFromDate(date){ return hashString(formatDateSeed(date)); }
+
+  function mulberry32(seed){
+    let a = seed >>> 0;
+    return function(){
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // Permutaciones de {1,2,3,4,5} y firma/rango (idénticos a Thoughts).
+  const FACT = [1,1,2,6,24,120];
+  function getPermutations(arr){
+    if(arr.length===1) return [arr];
+    let res=[];
+    for(let i=0;i<arr.length;i++){
+      const c=arr[i], rem=arr.slice(0,i).concat(arr.slice(i+1));
+      for(const p of getPermutations(rem)) res.push([c].concat(p));
+    }
+    return res;
+  }
+  const ALL_PERMS = getPermutations([1,2,3,4,5]);          // 120
+  const PERM_STRINGS = ALL_PERMS.map(p=>p.join(','));
+
+  function lehmerRank(p){
+    let r=0;
+    for(let i=0;i<p.length;i++){ let c=0;
+      for(let j=i+1;j<p.length;j++) if(p[j]<p[i]) c++;
+      r += c*FACT[p.length-1-i];
+    }
+    return r;
+  }
+  // ── Regla canónica de fertilidad (Q3) ───────────────────────────
+  // fertilidad(fecha) = 1 + ( [ rdig(día)·rdig(mes)·rdig(sumaCifrasAño)
+  //                              + día + mes ] mod 24 )
+  function rdig(n){ n=Math.abs(n); if(n===0) return 0; const r=n%9; return r===0?9:r; }
+  function sumaCifrasAnio(y){ return String(y).split('').reduce((a,b)=>a+(+b),0); }
+  function fertility(date){
+    const dia = date.getDate(), mes = date.getMonth()+1;
+    const sY  = sumaCifrasAnio(date.getFullYear());
+    const k = rdig(dia)*rdig(mes)*rdig(sY) + dia + mes;
+    return 1 + (((k % 24) + 24) % 24);
+  }
+
+  // ── Selección de las cinco permutaciones del día natal ──────────
+  // El día natal tiene fertilidad 5: engendra exactamente cinco
+  // permutaciones. Se eligen deterministamente desde la semilla del
+  // día natal, SIN reemplazo (cinco permutaciones únicas). Cada una
+  // dará la velocidad y la respiración de uno de los cinco números.
+  function pickPerms(date, n){
+    const rng = mulberry32(seedFromDate(date));
+    const idx=[], used=new Set();
+    while(idx.length<n){
+      const i = Math.floor(rng()*PERM_STRINGS.length);
+      if(!used.has(i)){ used.add(i); idx.push(i); }
+    }
+    return idx.map(i => PERM_STRINGS[i].split(',').map(Number));
+  }
+
+  // ── Motor temporal de cada número ───────────────────────────────
+  // Cada número tiene un 'period': cuántos segundos tarda en avanzar
+  // UN paso (de un dígito al siguiente). El período nace del sistema
+  // (ver buildNumbers). El espectro va de ~1 segundo (el más rápido,
+  // titila) a meses por paso (el más lento, estilo Cage/ASLSP): un
+  // número que casi nunca cambia, indiferente a si alguien lo mira.
+
+  // K: único parámetro del espectro, y nace del sistema — es 5, los
+  // cinco elementos de la permutación (y la fertilidad del día natal).
+  // El espectro de velocidad no se fija a mano: nace del rango de
+  // Lehmer de cada permutación (0..119, del sistema), del rango máximo
+  // (119), de la base 2 (la más elemental) y de K=5.
+  const K = 5;
+
+  function buildNumbers(date){
+    const perms = pickPerms(date, 5);
+    return perms.map((perm) => {
+      // Velocidad de cada número: período (segundos por paso) derivado
+      // enteramente del sistema. rank alto → exponente bajo → rápido;
+      // rank bajo → exponente alto → lentísimo (estilo Cage).
+      //   período = 2 ^ ( (119 − rank) / 5 )
+      const lr = lehmerRank(perm);                  // 0..119
+      const period = Math.pow(2, (119 - lr) / K);   // segundos por paso
+      return { perm, period, startValue: 1 };
+    });
+  }
+
+  // Estado de un número en el instante 'elapsed' (segundos desde BIRTH).
+  // Devuelve { value (1..5) }. Avanza un paso cada 'period' segundos,
+  // de forma constante. Sin pausa: el descanso vive en la lentitud
+  // misma de los números lentos (un número que cambia cada meses está,
+  // por su naturaleza, casi siempre quieto). Determinista y reproducible.
+  function numberStateAt(num, elapsed){
+    const steps = Math.floor(elapsed / num.period);
+    const value = ((num.startValue - 1 + steps) % 5) + 1;   // 1..5
+    return { value };
+  }
+
+  // ── Render ──────────────────────────────────────────────────────
+  const clockEl = document.getElementById('clock');
+  const cells = [];
+  // 25 celdas; la fila central es la fila 3 → índices 10..14.
+  const CENTER_ROW_START = 10;
+  for(let i=0;i<25;i++){
+    const cell = document.createElement('div');
+    cell.className = 'digit';
+    clockEl.appendChild(cell);
+    cells.push(cell);
+  }
+
+  let NUMBERS = buildNumbers(BIRTH);
+
+  function elapsedSeconds(){
+    return (Date.now() - BIRTH.getTime()) / 1000;     // segundos reales desde el nacimiento
+  }
+
+  let lastShown = [null,null,null,null,null];
+  function render(){
+    const elapsed = elapsedSeconds();
+    if(elapsed < 0){
+      // Antes del nacimiento (no debería ocurrir en uso normal): vacío.
+      for(let k=0;k<5;k++) cells[CENTER_ROW_START+k].textContent = '';
+    } else {
+      for(let k=0;k<5;k++){
+        const st = numberStateAt(NUMBERS[k], elapsed);
+        const cell = cells[CENTER_ROW_START + k];
+        if(st.value !== lastShown[k]){
+          cell.textContent = st.value;
+          lastShown[k] = st.value;
+        }
+      }
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+
+  // ── Cursor personalizado ────────────────────────────────────────
+  const cursor = document.getElementById('cursor');
+  window.addEventListener('pointermove', e=>{
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+
+  // ── Pantalla completa ───────────────────────────────────────────
+  function toggleFullscreen(){
+    const doc=document, el=doc.documentElement;
+    const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
+    try{
+      if(!isFs){ if(el.requestFullscreen) el.requestFullscreen(); else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen(); }
+      else { if(doc.exitFullscreen) doc.exitFullscreen(); else if(doc.webkitExitFullscreen) doc.webkitExitFullscreen(); }
+    }catch(e){}
+  }
+  </script>
+</body>
+</html>
