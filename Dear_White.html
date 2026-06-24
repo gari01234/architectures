@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Dear: White</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;cursor:none}
+#field{position:fixed;inset:0;display:block}
+#cap{position:fixed;left:0;right:0;bottom:14px;text-align:center;
+  font-family:Georgia,serif;font-size:11px;letter-spacing:.22em;
+  color:rgba(120,120,120,.30);pointer-events:none;z-index:5}
+#fsb{position:fixed;top:10px;right:12px;z-index:10;background:transparent;
+  border:none;color:rgba(140,140,140,.35);font-size:17px;cursor:none}
+#cursor{position:fixed;width:7px;height:7px;border-radius:50%;
+  background:rgba(160,160,160,.5);transform:translate(-50%,-50%);
+  pointer-events:none;z-index:50;left:-50px;top:-50px}
+</style></head><body>
+<canvas id="field"></canvas>
+<div id="cap"></div>
+<button id="fsb" onclick="tfs()">⛶</button>
+<div id="cursor"></div>
+<script>
+/* ─────────────────────────────────────────────────────────────
+   DEAR: WHITE
+   Un único blanco — el 255 de la pantalla, la luz emitida.
+   Sin forma. Su arquitectura es el tiempo: habita el tiempo de Dear:.
+   Su presencia luminosa es la fase continua del número lento (N3,
+   "Cage") de Dear: Time — ciclo ~16 meses, onda simétrica
+   brasa→plenitud→brasa, tan lenta que no se percibe transcurrir.
+   Bebe del MISMO reloj que Time: mismo BIRTH, mismo hash, mismo
+   mulberry32, misma fórmula de período. White y Time son dos caras
+   del único tiempo de Dear: — número (Time) y duración (White).
+   ───────────────────────────────────────────────────────────── */
+
+// ── Núcleo canónico (idéntico a Dear: Time) ──────────────────
+const BIRTH = new Date(2026, 5, 22, 0,0,0,0);   // Big Bang: 22 jun 2026, 00:00
+const MONTH_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+function hashString(str){
+  let h = 2166136261 >>> 0;
+  for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h,16777619); }
+  return h >>> 0;
+}
+function formatDateSeed(d){ return MONTH_ABBR[d.getMonth()]+"."+d.getDate()+"."+d.getFullYear(); }
+function seedFromDate(d){ return hashString(formatDateSeed(d)); }
+function mulberry32(seed){
+  let a = seed >>> 0;
+  return function(){
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function getPermutations(arr){
+  if(arr.length<=1) return [arr];
+  const res=[];
+  for(let i=0;i<arr.length;i++){
+    const c=arr[i], rem=arr.slice(0,i).concat(arr.slice(i+1));
+    for(const p of getPermutations(rem)) res.push([c].concat(p));
+  }
+  return res;
+}
+const ALL_PERMS = getPermutations([1,2,3,4,5]);
+const PERM_STRINGS = ALL_PERMS.map(p=>p.join(','));
+function lehmerRank(p){
+  const FACT=[1,1,2,6,24,120]; const a=p.slice(); let rank=0; const n=a.length;
+  const elems=[...a].sort((x,y)=>x-y);
+  for(let i=0;i<n;i++){
+    const pos=elems.indexOf(a[i]); rank+=pos*FACT[n-1-i]; elems.splice(pos,1);
+  }
+  return rank;
+}
+function pickPerms(date, n){
+  const rng = mulberry32(seedFromDate(date));
+  const idx=[], used=new Set();
+  while(idx.length<n){
+    const i = Math.floor(rng()*PERM_STRINGS.length);
+    if(!used.has(i)){ used.add(i); idx.push(i); }
+  }
+  return idx.map(i => PERM_STRINGS[i].split(',').map(Number));
+}
+const K = 5;
+function buildNumbers(date){
+  return pickPerms(date,5).map(perm=>{
+    const lr = lehmerRank(perm);
+    const period = Math.pow(2,(119-lr)/K);   // segundos por paso
+    return { perm, period, lr };
+  });
+}
+
+// ── El número lento (N3, el de Cage) ─────────────────────────
+// Es el de período mayor (rank menor). Lo hallamos por el sistema,
+// no a mano: el de mayor 'period' entre los cinco del día natal.
+const NUMBERS = buildNumbers(BIRTH);
+let SLOW = NUMBERS[0];
+for(const nb of NUMBERS) if(nb.period > SLOW.period) SLOW = nb;
+const CYCLE = SLOW.period * 5;   // ciclo completo (5 posiciones) en segundos
+
+// ── Tiempo desde el Big Bang ─────────────────────────────────
+function elapsedSeconds(){ return (Date.now() - BIRTH.getTime())/1000; }
+
+// ── La luz: fase continua → onda simétrica → brasa..plenitud ──
+const BRASA = 0.3005;        // mínimo de luz: rgb 149 en el punto más lejano del ciclo
+                              // (penumbra alta, luz en reposo; nunca cerca del negro)
+// percepción: la onda es simétrica PARA EL OJO (corrección gamma sRGB)
+function srgbEncode(lin){    // lineal (0..1) → valor sRGB (0..1)
+  return lin <= 0.0031308 ? 12.92*lin : 1.055*Math.pow(lin,1/2.4)-0.055;
+}
+function lightAt(elapsed){
+  const phase = ((elapsed / SLOW.period) % 5) / 5;        // 0..1 continuo
+  // Nace en ESPLENDOR: plenitud en el Big Bang (fase 0), desciende a la
+  // brasa a mitad de ciclo, vuelve a la plenitud al cerrar. Sin saltos.
+  const wave  = (1 + Math.cos(2*Math.PI*phase)) / 2;       // 1 en nacimiento, 0 a mitad
+  const lin   = BRASA + (1.0 - BRASA) * wave;              // luz lineal en [brasa,1]
+  return srgbEncode(lin);                                   // a sRGB para el ojo
+}
+
+// ── Render: el campo entero ES la luz ────────────────────────
+const cv = document.getElementById('field');
+const ctx = cv.getContext('2d',{alpha:false});
+let DPR = Math.max(1, window.devicePixelRatio||1);
+function resize(){
+  const W=window.innerWidth,H=window.innerHeight;
+  cv.width=Math.floor(W*DPR); cv.height=Math.floor(H*DPR);
+  cv.style.width=W+'px'; cv.style.height=H+'px';
+}
+function render(){
+  const e = elapsedSeconds();
+  let v;
+  if(e < 0){ v = 0; }                       // antes del Big Bang: oscuridad
+  else { v = Math.round(lightAt(e)*255); }   // el único blanco, a su presencia de hoy
+  ctx.fillStyle = `rgb(${v},${v},${v})`;
+  ctx.fillRect(0,0,cv.width,cv.height);
+  requestAnimationFrame(render);
+}
+resize(); render();
+window.addEventListener('resize',()=>{DPR=Math.max(1,window.devicePixelRatio||1);resize();});
+
+// ── Cursor propio ────────────────────────────────────────────
+const cur=document.getElementById('cursor');
+window.addEventListener('pointermove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+
+// ── Pantalla completa ────────────────────────────────────────
+function tfs(){
+  const d=document, el=d.documentElement;
+  const fs=d.fullscreenElement||d.webkitFullscreenElement;
+  if(!fs){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el); }
+  else { (d.exitFullscreen||d.webkitExitFullscreen).call(d); }
+}
+</script>
+</body></html>
