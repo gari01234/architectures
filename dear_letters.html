@@ -1,851 +1,152 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dear: Letters</title>
-
-  <style>
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; }
-
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #ffffff;
-      color: #111111;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      font-weight: 200;
-      font-size: 12px;
-    }
-
-    #app {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    svg#plan {
-      width: 100vmin;
-      height: 100vmin;
-      max-width: 96vw;
-      max-height: 96vh;
-    }
-
-    button {
-      position: fixed;
-      z-index: 260;
-      border: none;
-      border-radius: 4px;
-      padding: 8px 12px;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      font-weight: 200;
-      font-size: 12px;
-      line-height: 1;
-      color: #111111;
-      background: rgba(0,0,0,0.08);
-      cursor: pointer;
-      transition: background .2s;
-    }
-
-    button:hover { background: rgba(0,0,0,0.14); }
-
-    #dayTitle {
-      position: fixed;
-      top: 16px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      z-index: 200;
-      pointer-events: none;
-      user-select: none;
-    }
-
-    #pieceTitle {
-      font-family: Futura, "Futura PT", "Century Gothic", "Avenir Next", Avenir, sans-serif;
-      font-weight: 400;
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      color: rgba(0,0,0,0.32);
-    }
-
-    #toggleUIButton {
-      left: 10px;
-      bottom: 10px;
-      background: transparent;
-      border-radius: 0;
-      padding: 8px 4px;
-      font-family: Futura, "Futura PT", "Century Gothic", "Avenir Next", Avenir, sans-serif;
-      font-weight: 400;
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      color: rgba(0,0,0,0.55);
-      text-transform: none;
-      transition: color 0.2s;
-    }
-
-    #toggleUIButton:hover {
-      background: transparent;
-      color: #111111;
-    }
-
-    #uiPanel {
-      position: fixed;
-      left: 10px;
-      bottom: 50px;
-      z-index: 250;
-      width: 320px;
-      max-height: min(78vh, 720px);
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: none;
-      padding: 14px 16px 16px;
-      background: rgba(255,255,255,0.92);
-      border: 1px solid rgba(0,0,0,0.10);
-      border-radius: 6px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-      backdrop-filter: blur(8px);
-    }
-
-    #uiPanel.open { display: block; }
-
-    #uiPanel details {
-      margin-bottom: 12px;
-    }
-
-    #uiPanel summary {
-      cursor: pointer;
-      font-weight: 200;
-      font-size: 12px;
-      padding: 4px 0;
-      color: #111111;
-    }
-
-    #uiPanel summary:hover { color: #444; }
-
-    #uiPanel .row {
-      margin: 8px 0;
-    }
-
-    #uiPanel label {
-      display: block;
-      font-size: 11px;
-      color: rgba(0,0,0,0.7);
-      margin-bottom: 4px;
-    }
-
-    #uiPanel input[type="date"] {
-      width: 100%;
-      padding: 7px 8px;
-      border: 1px solid rgba(0,0,0,0.22);
-      background: rgba(255,255,255,0.55);
-      font: inherit;
-      font-size: 12px;
-      border-radius: 2px;
-    }
-
-    .panelButton {
-      position: static;
-      display: block;
-      width: 100%;
-      margin-top: 8px;
-      padding: 8px 10px;
-      font-size: 12px;
-      background: rgba(0,0,0,0.06);
-      cursor: pointer;
-    }
-
-    .panelButton:hover { background: rgba(0,0,0,0.12); }
-
-    .stats {
-      font-size: 11px;
-      color: rgba(0,0,0,0.68);
-      line-height: 1.5;
-      word-break: break-word;
-    }
-
-    .stats .k {
-      display: inline-block;
-      width: 110px;
-      color: rgba(0,0,0,0.45);
-    }
-  </style>
-</head>
-<body>
-  <header id="dayTitle">
-    <div id="pieceTitle">Dear: Letters</div>
-  </header>
-
-  <main id="app">
-    <svg id="plan" viewBox="0 0 1600 1600" role="img" aria-label="Field of letters"></svg>
-  </main>
-
-  <button id="toggleUIButton" type="button">Show UI</button>
-
-  <aside id="uiPanel">
-    <details open>
-      <summary>Dear: Letters</summary>
-
-      <div class="row">
-        <label for="dateInput">date</label>
-        <input id="dateInput" type="date" />
-      </div>
-
-      <button id="todayButton" class="panelButton" type="button">today</button>
-      <button id="exportButton" class="panelButton" type="button">export A3 (PNG)</button>
-    </details>
-
-    <details>
-      <summary>structure</summary>
-      <div class="stats" id="stats"></div>
-    </details>
-  </aside>
-
-  <script>
-  (function() {
-    "use strict";
-
-    // ════════════════════════════════════════════════════════════════
-    //  Dear: Letters
-    //
-    //  Una pieza de Dear: Architectures.
-    //
-    //  Cada treinta días, un campo nuevo. La arquitectura se ha
-    //  reducido a su grado mínimo: 36 columnas (círculos negros)
-    //  en las intersecciones de la grilla 5×5. Ya no hay muros.
-    //  Las paredes que cerraban el espacio en Phrases y se redujeron
-    //  a cerramiento perimetral en Words, aquí se han desmaterializado
-    //  por completo. Solo quedan sus extremos puntuales.
-    //
-    //  Entre las columnas, las letras del alfabeto inglés (mayúsculas)
-    //  flotan en posiciones libres, derivadas determinísticamente de
-    //  la semilla del ciclo. Sin orden visible. Sin formación.
-    //  Movimiento libre dentro del campo: las columnas son obstáculos
-    //  que las letras deben evitar, igual que en Words las palabras
-    //  se evitan entre sí.
-    //
-    //  Cada ciclo elige entre 1 y 25 letras del alfabeto, sin
-    //  repetición dentro del ciclo. Entre ciclos las letras pueden
-    //  repetirse libremente: el alfabeto es lo que hay.
-    //
-    //  Fecha cero del sistema: 16 de mayo de 2026.
-    //  Ciclo: 30 días.
-    //
-    //  Letra es a palabra lo que columna es a muro: la unidad
-    //  mínima del soporte. Las palabras son arquitectura del
-    //  lenguaje; las letras son los elementos mínimos del lenguaje.
-    //  Los muros son arquitectura del espacio; las columnas son los
-    //  elementos mínimos del soporte espacial. La serie cierra aquí.
-    // ════════════════════════════════════════════════════════════════
-
-    // ── Constantes del sistema ─────────────────────────────────────
-    const GRID = 5;
-    const EPOCH = new Date(2026, 4, 16);     // 16 mayo 2026
-    const CYCLE_DAYS = 30;
-
-    /* ═══════════ EL RELOJ DE DEAR: (módulo canónico, autocontenido) ═══════════
-       Esta obra ya no lee el calendario del mundo: lee el reloj (Dear: Time).
-       Big Bang: 22 jun 2026 00:00 — la Gran Conjunción (todas las manecillas en 1).
-       La obra tiene un GENOMA: la permutación nacida de su título por el motor
-       canónico. Es llamada (engendra una pieza) cada vez que las 4 manecillas
-       lentas del reloj entran al estado exacto de su genoma (época fina); N1,
-       el segundero, deletrea el genoma completo dentro de cada época.
-       Piezas prenatales (n ≤ 0): el reloj proléptico — la última temporada
-       anterior al Big Bang, navegable; ceden el lugar cuando llega la vida.
-       Semilla de la pieza n: hash(genoma + '#' + n). Fertilidad: la escalera
-       Φ = 1 + ((L + n) mod 24), continua a través del nacimiento. */
-    const CLK = (function(){
-      const BIRTH_MS = new Date(2026, 5, 22, 0, 0, 0, 0).getTime();
-      const TITLE = "Dear: Letters";
-      function chash(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
-      function crng(seed){ let a=seed>>>0; return function(){ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
-      function cperms(arr){ if(arr.length<=1) return [arr]; const out=[]; for(let i=0;i<arr.length;i++){ const c=arr[i], rest=arr.slice(0,i).concat(arr.slice(i+1)); for(const p of cperms(rest)) out.push([c].concat(p)); } return out; }
-      const P120 = cperms([1,2,3,4,5]);
-      function clehmer(p){ const F=[1,1,2,6,24,120]; let r=0; for(let i=0;i<p.length;i++){ let c=0; for(let j=i+1;j<p.length;j++) if(p[j]<p[i]) c++; r+=c*F[p.length-1-i]; } return r; }
-      function firstPerm(seedStr){ const g=crng(chash(seedStr)); return P120[Math.floor(g()*120)]; }
-      // Manecillas natales de Time (idéntico a dear_time: seed "JUN.22.2026")
-      const natal = (function(){ const g=crng(chash("JUN.22.2026")); const idx=[], u=new Set();
-        while(idx.length<5){ const i=Math.floor(g()*120); if(!u.has(i)){ u.add(i); idx.push(i);} }
-        return idx.map(i=>{ const p=P120[i]; return Math.pow(2,(119-clehmer(p))/5); }); })();
-      // Períodos en segundos de N2..N5 (las 4 lentas; natal[0] es N1, el segundero)
-      const PER = [natal[1], natal[2], natal[3], natal[4]];
-      const GENOME = firstPerm(TITLE);
-      const L = clehmer(GENOME);
-      const TGT = [GENOME[1], GENOME[2], GENOME[3], GENOME[4]];
-      function hand(t, per){ const s=Math.floor(t/per); return ((s%5)+5)%5+1; }
-      // Épocas propias: aperturas del estado (N2..N5) = genoma, desde el inicio
-      // de la temporada prenatal de la obra hasta ahora.
-      const P_N3 = PER[1];
-      const backT = -(6 - GENOME[2]) * P_N3;         // inicio del preestreno (s)
-      function computeTimes(){
-        const nowT = (Date.now() - BIRTH_MS)/1000;
-        const evts = [backT];
-        for(const per of PER){
-          let t = Math.ceil(backT/per)*per;
-          if(t<=backT) t+=per;
-          for(; t<=nowT; t+=per) evts.push(t);
-        }
-        evts.sort(function(a,b){return a-b;});
-        const times=[]; let inState=false;
-        for(let i=0;i<evts.length;i++){
-          const t=evts[i]+1e-3;
-          const ok = hand(t,PER[0])===TGT[0] && hand(t,PER[1])===TGT[1] &&
-                     hand(t,PER[2])===TGT[2] && hand(t,PER[3])===TGT[3];
-          if(ok && !inState) times.push(BIRTH_MS + evts[i]*1000);
-          inState = ok;
-        }
-        return times;
-      }
-      const times = computeTimes();
-      let preCount = 0; for(const t of times) if(t < BIRTH_MS) preCount++;
-      function ord(i){ return i - preCount + 1; }
-      function phi(i){ return 1 + ((((L + ord(i)) % 24) + 24) % 24); }
-      function seedStr(i){ return GENOME.join(',') + '#' + ord(i); }
-      function idxAt(ms){
-        if(!times.length) return 0;
-        let lo=0, hi=times.length-1, ans=0;
-        if(ms < times[0]) return 0;
-        while(lo<=hi){ const m=(lo+hi)>>1; if(times[m]<=ms){ ans=m; lo=m+1; } else hi=m-1; }
-        return ans;
-      }
-      return { times:times, count:times.length, preCount:preCount,
-               GENOME:GENOME, L:L, ord:ord, phi:phi, seedStr:seedStr, idxAt:idxAt,
-               BIRTH_MS:BIRTH_MS };
-    })();
-
-    const MAX_LETTERS_PER_CYCLE = 25;
-    const MIN_LETTERS_PER_CYCLE = 1;
-
-    const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
-    const MONTH_NAMES = [
-      "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-      "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
-    ];
-
-    // ── Hash y RNG (determinismo) ──────────────────────────────────
-    function hashString(s) {
-      let h = 2166136261 >>> 0;
-      for (let i = 0; i < s.length; i++) {
-        h ^= s.charCodeAt(i);
-        h = Math.imul(h, 16777619);
-      }
-      return h >>> 0;
-    }
-
-    function mulberry32(seed) {
-      let t = seed >>> 0;
-      return function() {
-        t += 0x6D2B79F5;
-        let r = Math.imul(t ^ (t >>> 15), 1 | t);
-        r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-        return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-      };
-    }
-
-    // ── Fechas ─────────────────────────────────────────────────────
-    function formatDateSeed(date) {
-      const m = MONTH_NAMES[date.getMonth()];
-      const d = date.getDate();
-      const y = date.getFullYear();
-      return m + "." + d + "." + y;
-    }
-
-    function formatDateISO(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
-      return y + "-" + m + "-" + d;
-    }
-
-    function parseDateISO(s) {
-      const parts = s.split("-");
-      return new Date(parseInt(parts[0], 10),
-                      parseInt(parts[1], 10) - 1,
-                      parseInt(parts[2], 10));
-    }
-
-    function dayDiff(a, b) {
-      const A = new Date(a.getFullYear(), a.getMonth(), a.getDate());
-      const B = new Date(b.getFullYear(), b.getMonth(), b.getDate());
-      return Math.round((A.getTime() - B.getTime()) / 86400000);
-    }
-
-    function dateIsAfter(a, b) { return dayDiff(a, b) > 0; }
-    function dateIsBefore(a, b) { return dayDiff(a, b) < 0; }
-
-    // ── Régimen de ciclos ──────────────────────────────────────────
-    //
-    //   Ciclo K = días [EPOCH + K*30, EPOCH + (K+1)*30 - 1].
-    //   La fecha-semilla del ciclo K es EPOCH + K*30 días.
-    function cycleNumberOf(date) {
-      const _i = CLK.idxAt(date.getTime()); window.CLK_CUR = _i; return _i;
-    }
-
-    function cycleStartDate(k) {
-      const i = Math.max(0, Math.min(k, CLK.count - 1));
-      return new Date(CLK.times[i]);
-    }
-
-    function cycleSeedString(k) {
-      return CLK.seedStr(k);
-    }
-
-    // ── Regla canónica de fertilidad (Q3) ──────────────────────────
-    //
-    //   Cuántas permutaciones engendra una fecha. Universal a las cinco
-    //   obras de Dear:. Nace de la fecha misma (no de un oráculo):
-    //
-    //     fertilidad = 1 + ( [ rdig(día)·rdig(mes)·rdig(sumaCifrasAño)
-    //                          + día + mes ] mod 24 )
-    //
-    //   rdig = raíz digital (reducir a un dígito sumando cifras).
-    function rdig(n) { n = Math.abs(n); if (n === 0) return 0; const r = n % 9; return r === 0 ? 9 : r; }
-    function sumaCifrasAnio(y) { return String(y).split('').reduce((a, b) => a + (+b), 0); }
-    function fertility(date) {
-      const dia = date.getDate(), mes = date.getMonth() + 1;
-      const sY = sumaCifrasAnio(date.getFullYear());
-      const k = rdig(dia) * rdig(mes) * rdig(sY) + dia + mes;
-      return 1 + (((k % 24) + 24) % 24);
-    }
-
-    // ── Selección de letras del ciclo ──────────────────────────────
-    //
-    //   N letras entre 1 y 25, sin repetición dentro del ciclo.
-    //   Se selecciona N determinísticamente, luego se barajan las 26
-    //   letras del alfabeto y se toman las primeras N.
-    function lettersForCycle(k) {
-      const seed = cycleSeedString(k);
-      // N letras = fertilidad canónica (Q3) del primer día del ciclo.
-      const n = CLK.phi(k);
-
-      // Barajado determinista del alfabeto con la semilla del ciclo
-      const rngShuffle = mulberry32(hashString("shuffle:" + seed));
-      const arr = ALPHABET.slice();
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(rngShuffle() * (i + 1));
-        const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
-      }
-      return arr.slice(0, Math.min(n, 25));
-    }
-
-    // ── Geometría del campo y columnas ─────────────────────────────
-    //
-    //   Mismo cuadrado físico que Words y Phrases: 1200 × 1200 dentro
-    //   del SVG 1600 × 1600, con margen de 200.
-    //
-    //   Las 36 columnas se sitúan en las (GRID+1)² = 36 intersecciones
-    //   de la grilla 5×5: una en cada esquina del cuadrado y en cada
-    //   intersección interior. Su diámetro coincide con el grosor de
-    //   los muros en Words (side × 0.027): cada columna es la
-    //   reducción del muro a su punto extremo, conservando su materia.
-    function buildField() {
-      const W = 1600;
-      const margin = 200;
-      const side = W - 2 * margin;
-      const fieldBox = {
-        x0: margin, y0: margin,
-        x1: margin + side, y1: margin + side
-      };
-
-      const columnDiameter = side * 0.027;       // = grosor de muro en Words
-      const columnRadius = columnDiameter / 2;
-
-      const cellSize = side / GRID;              // ancho de una celda
-
-      // Posiciones de las 36 columnas (6×6 intersecciones)
-      const columns = [];
-      for (let row = 0; row <= GRID; row++) {
-        for (let col = 0; col <= GRID; col++) {
-          columns.push({
-            cx: fieldBox.x0 + col * cellSize,
-            cy: fieldBox.y0 + row * cellSize,
-            r: columnRadius
-          });
-        }
-      }
-
-      return { fieldBox, side, cellSize, columnDiameter, columnRadius, columns };
-    }
-
-    // ── Posiciones libres con búsqueda de no-colisión ──────────────
-    //
-    //   Cada letra recibe una posición (x, y) en coordenadas continuas
-    //   dentro del cuadrado. La posición se genera determinísticamente
-    //   desde la semilla del ciclo + el índice de la letra + el número
-    //   de intento.
-    //
-    //   Restricciones:
-    //   - Las letras no se solapan entre sí (mismo padding que Words).
-    //   - Las letras no tocan las columnas (las columnas son obstáculos
-    //     físicos: la caja de la letra no puede intersectar el círculo
-    //     de ninguna columna).
-    //
-    //   El ancho real de cada letra se mide con getBBox() del SVG, no
-    //   por estimación. Misma técnica robusta que Words.
-    function placeLettersInField(cycleSeed, letters, field, fontPx) {
-      const { fieldBox, columns } = field;
-
-      // Margen interior para que las letras no toquen los bordes del cuadrado.
-      const innerMargin = field.side * 0.06;
-      const innerX0 = fieldBox.x0 + innerMargin;
-      const innerY0 = fieldBox.y0 + innerMargin;
-      const innerX1 = fieldBox.x1 - innerMargin;
-      const innerY1 = fieldBox.y1 - innerMargin;
-
-      const padding = fontPx * 0.45;
-      // Separación adicional entre letra y columna (la columna es punto).
-      const colPadding = fontPx * 0.20;
-
-      function boxesOverlap(a, b, pad) {
-        return !(a.x1 + pad < b.x0 || b.x1 + pad < a.x0 ||
-                 a.y1 + pad < b.y0 || b.y1 + pad < a.y0);
-      }
-
-      function boxIntersectsCircle(box, cx, cy, r, pad) {
-        // Punto más cercano del rectángulo al centro del círculo
-        const nearestX = Math.max(box.x0, Math.min(cx, box.x1));
-        const nearestY = Math.max(box.y0, Math.min(cy, box.y1));
-        const dx = nearestX - cx;
-        const dy = nearestY - cy;
-        return (dx * dx + dy * dy) < (r + pad) * (r + pad);
-      }
-
-      function measureLetter(letter) {
-        const t = document.createElementNS(ns, "text");
-        t.setAttribute("x", 0);
-        t.setAttribute("y", 0);
-        t.setAttribute("text-anchor", "middle");
-        t.setAttribute("dominant-baseline", "middle");
-        t.setAttribute("fill", "#000000");
-        t.setAttribute("font-family", "Futura, 'Futura PT', 'Century Gothic', 'Avenir Next', Avenir, sans-serif");
-        t.setAttribute("font-weight", "700");
-        t.setAttribute("font-size", fontPx);
-        t.setAttribute("letter-spacing", "0.06em");
-        t.textContent = letter;
-        svgEl.appendChild(t);
-        const bb = t.getBBox();
-        svgEl.removeChild(t);
-        return { w: bb.width + fontPx * 0.10, h: bb.height + fontPx * 0.10 };
-      }
-
-      function letterBox(cx, cy, w, h) {
-        return { x0: cx - w/2, y0: cy - h/2, x1: cx + w/2, y1: cy + h/2 };
-      }
-
-      const measures = letters.map(measureLetter);
-      const placed = [];
-      const MAX_ATTEMPTS = 800;
-
-      for (let i = 0; i < letters.length; i++) {
-        const letter = letters[i];
-        const { w, h } = measures[i];
-
-        let attempt = 0;
-        let placedOK = false;
-
-        while (attempt < MAX_ATTEMPTS && !placedOK) {
-          const subSeed = cycleSeed + ":" + i + ":" + attempt;
-          const rng = mulberry32(hashString(subSeed));
-
-          const minCx = innerX0 + w/2;
-          const maxCx = innerX1 - w/2;
-          const minCy = innerY0 + h/2;
-          const maxCy = innerY1 - h/2;
-
-          let cx, cy;
-          if (maxCx < minCx) cx = (innerX0 + innerX1) / 2;
-          else cx = minCx + rng() * (maxCx - minCx);
-          if (maxCy < minCy) cy = (innerY0 + innerY1) / 2;
-          else cy = minCy + rng() * (maxCy - minCy);
-
-          const box = letterBox(cx, cy, w, h);
-
-          let collides = false;
-
-          // Verificar contra otras letras
-          for (let j = 0; j < placed.length; j++) {
-            if (boxesOverlap(box, placed[j].box, padding)) {
-              collides = true; break;
-            }
-          }
-
-          // Verificar contra las 36 columnas
-          if (!collides) {
-            for (let c = 0; c < columns.length; c++) {
-              if (boxIntersectsCircle(box, columns[c].cx, columns[c].cy, columns[c].r, colPadding)) {
-                collides = true; break;
-              }
-            }
-          }
-
-          if (!collides) {
-            placed.push({ letter, cx, cy, box, fontPx });
-            placedOK = true;
-          }
-          attempt++;
-        }
-
-        // Segunda fase: relajación progresiva del padding entre letras
-        // (no relajamos las columnas, que son materia).
-        if (!placedOK) {
-          for (let relax = 0.7; relax >= 0.0 && !placedOK; relax -= 0.1) {
-            const padRelaxed = padding * relax;
-            for (let a = 0; a < 200 && !placedOK; a++) {
-              const subSeed = cycleSeed + ":" + i + ":relax:" + relax.toFixed(1) + ":" + a;
-              const rng = mulberry32(hashString(subSeed));
-              const minCx = innerX0 + w/2, maxCx = innerX1 - w/2;
-              const minCy = innerY0 + h/2, maxCy = innerY1 - h/2;
-              let cx = (maxCx < minCx) ? (innerX0 + innerX1)/2 : minCx + rng()*(maxCx-minCx);
-              let cy = (maxCy < minCy) ? (innerY0 + innerY1)/2 : minCy + rng()*(maxCy-minCy);
-              const box = letterBox(cx, cy, w, h);
-              let collides = false;
-              for (let j = 0; j < placed.length; j++) {
-                if (boxesOverlap(box, placed[j].box, padRelaxed)) { collides = true; break; }
-              }
-              if (!collides) {
-                for (let c = 0; c < columns.length; c++) {
-                  if (boxIntersectsCircle(box, columns[c].cx, columns[c].cy, columns[c].r, colPadding)) {
-                    collides = true; break;
-                  }
-                }
-              }
-              if (!collides) {
-                placed.push({ letter, cx, cy, box, fontPx });
-                placedOK = true;
-              }
-            }
-          }
-        }
-
-        // Fallback final: posición central forzada
-        if (!placedOK) {
-          const cx = (innerX0 + innerX1) / 2;
-          const cy = (innerY0 + innerY1) / 2;
-          placed.push({ letter, cx, cy, box: letterBox(cx, cy, w, h), fontPx });
-        }
-      }
-
-      return placed;
-    }
-
-    // ── Dibujo SVG ─────────────────────────────────────────────────
-    const svgEl = document.getElementById("plan");
-    const ns = "http://www.w3.org/2000/svg";
-
-    function drawField(cycleK) {
-      while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
-
-      const field = buildField();
-      const cycleSeed = cycleSeedString(cycleK);
-
-      // Tamaño de fuente igual a Words
-      const fontPx = field.side * 0.045;
-
-      // Dibujar las 36 columnas
-      field.columns.forEach(col => {
-        const c = document.createElementNS(ns, "circle");
-        c.setAttribute("cx", col.cx);
-        c.setAttribute("cy", col.cy);
-        c.setAttribute("r", col.r);
-        c.setAttribute("fill", "#000000");
-        svgEl.appendChild(c);
-      });
-
-      // Letras del ciclo
-      const letters = lettersForCycle(cycleK);
-      const placed = placeLettersInField(cycleSeed, letters, field, fontPx);
-
-      placed.forEach(p => {
-        const t = document.createElementNS(ns, "text");
-        t.setAttribute("x", p.cx);
-        t.setAttribute("y", p.cy);
-        t.setAttribute("text-anchor", "middle");
-        t.setAttribute("dominant-baseline", "middle");
-        t.setAttribute("fill", "#000000");
-        t.setAttribute("font-family", "Futura, 'Futura PT', 'Century Gothic', 'Avenir Next', Avenir, sans-serif");
-        t.setAttribute("font-weight", "700");
-        t.setAttribute("font-size", p.fontPx);
-        t.setAttribute("letter-spacing", "0.06em");
-        t.textContent = p.letter;
-        svgEl.appendChild(t);
-      });
-
-      return { field, letters, placed };
-    }
-
-    // ── UI y estado ────────────────────────────────────────────────
-    const dateInput = document.getElementById("dateInput");
-    const todayButton = document.getElementById("todayButton");
-    const toggleUIButton = document.getElementById("toggleUIButton");
-    const uiPanel = document.getElementById("uiPanel");
-    const pieceTitleEl = document.getElementById("pieceTitle");
-    const statsEl = document.getElementById("stats");
-    let currentCycle = null;
-
-    function renderStats(k, seed, letters) {
-      const startDate = cycleStartDate(k);
-      const endDate = cycleStartDate(k + 1);
-      const endDateMinus1 = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 1);
-      const lines = [];
-      lines.push('<div><span class="k">piece</span>' + CLK.ord(k) + (CLK.ord(k) <= 0 ? ' (prenatal)' : '') + '</div>');
-      lines.push('<div><span class="k">born</span>' + formatDateSeed(cycleStartDate(k)) + '</div>');
-      lines.push('<div><span class="k">reigns to</span>' + (k < CLK.count - 1 ? formatDateSeed(new Date(CLK.times[k+1])) : 'now') + '</div>');
-      lines.push('<div><span class="k">seed</span>' + seed + '</div>');
-      lines.push('<div><span class="k">letters</span>' + letters.length + '</div>');
-      lines.push('<div><span class="k">set</span>' + letters.join(" ") + '</div>');
-      statsEl.innerHTML = lines.join("");
-    }
-
-    function generate(date) {
-      const k = cycleNumberOf(date);
-      currentCycle = k;
-      const seed = cycleSeedString(k);
-
-      pieceTitleEl.textContent = "Dear: Letters — " + ('piece ' + CLK.ord(window.CLK_CUR||0) + ((CLK.ord(window.CLK_CUR||0))<=0?' (prenatal)':'') + ' · ' + formatDateSeed(cycleStartDate(window.CLK_CUR||0)));
-      document.title = "Dear: Letters — " + ('piece ' + CLK.ord(window.CLK_CUR||0) + ((CLK.ord(window.CLK_CUR||0))<=0?' (prenatal)':'') + ' · ' + formatDateSeed(cycleStartDate(window.CLK_CUR||0)));
-
-      const result = drawField(k);
-      renderStats(k, seed, result.letters);
-    }
-
-    function toggleUI() {
-      const isOpen = uiPanel.classList.toggle("open");
-      toggleUIButton.textContent = isOpen ? "Hide UI" : "Show UI";
-    }
-
-    function onDateChange() {
-      const v = dateInput.value;
-      if (!v) return;
-      const chosen = parseDateISO(v);
-      const today = new Date();
-      if (dateIsAfter(chosen, today)) {
-        dateInput.value = formatDateISO(today);
-        generate(today);
-        return;
-      }
-      if (dateIsBefore(chosen, EPOCH)) {
-        dateInput.value = formatDateISO(EPOCH);
-        generate(EPOCH);
-        return;
-      }
-      generate(chosen);
-    }
-
-    function goToToday() {
-      const today = new Date();
-      dateInput.value = formatDateISO(today);
-      generate(today);
-    }
-
-    // ── Export A3 vertical 600 DPI ─────────────────────────────────
-    function exportA3() {
-      if (currentCycle === null) return;
-      buildAndDownloadA3(true).then(() => buildAndDownloadA3(false));
-    }
-
-    function buildAndDownloadA3(withTitle) {
-      return new Promise((resolve, reject) => {
-        const dpi = 600;
-        const mmToIn = 1 / 25.4;
-        const pxW = Math.round(297 * mmToIn * dpi);
-        const pxH = Math.round(420 * mmToIn * dpi);
-
-        const svgClone = svgEl.cloneNode(true);
-        const seed = cycleSeedString(currentCycle);
-
-        if (withTitle) {
-          const titleEl = document.createElementNS(ns, "text");
-          titleEl.setAttribute("x", 800);
-          titleEl.setAttribute("y", 90);
-          titleEl.setAttribute("text-anchor", "middle");
-          titleEl.setAttribute("dominant-baseline", "middle");
-          titleEl.setAttribute("fill", "#000000");
-          titleEl.setAttribute("font-family", "Futura, 'Futura PT', 'Century Gothic', 'Avenir Next', Avenir, sans-serif");
-          titleEl.setAttribute("font-weight", "400");
-          titleEl.setAttribute("font-size", 26);
-          titleEl.setAttribute("letter-spacing", "0.18em");
-          titleEl.textContent = "DEAR: LETTERS — " + seed;
-          svgClone.appendChild(titleEl);
-        }
-
-        const svgStr = new XMLSerializer().serializeToString(svgClone);
-
-        const canvas = document.createElement("canvas");
-        canvas.width = pxW; canvas.height = pxH;
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, pxW, pxH);
-
-        const img = new Image();
-        const blob = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-
-        img.onload = () => {
-          const targetSide = pxW * 0.86;
-          const x = (pxW - targetSide) / 2;
-          const y = (pxH - targetSide) / 2;
-          ctx.drawImage(img, x, y, targetSide, targetSide);
-          URL.revokeObjectURL(url);
-
-          canvas.toBlob((b) => {
-            const a = document.createElement("a");
-            const suffix = withTitle ? "_titled" : "";
-            a.href = URL.createObjectURL(b);
-            a.download = "dear_letters_" + seed + suffix + ".png";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-            resolve();
-          }, "image/png");
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
-    }
-
-    // ── Listeners y arranque ───────────────────────────────────────
-    toggleUIButton.addEventListener("click", toggleUI);
-    todayButton.addEventListener("click", goToToday);
-    dateInput.addEventListener("change", onDateChange);
-    document.getElementById("exportButton").addEventListener("click", exportA3);
-
-    (function init() {
-      const today = new Date();
-      dateInput.min = formatDateISO(EPOCH);
-      dateInput.max = formatDateISO(today);
-      dateInput.value = formatDateISO(today);
-      generate(today);
-    })();
-  })();
-  </script>
-
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Dear: White</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;cursor:none}
+#field{position:fixed;inset:0;display:block}
+#cap{position:fixed;left:0;right:0;bottom:14px;text-align:center;
+  font-family:Georgia,serif;font-size:11px;letter-spacing:.22em;
+  color:rgba(120,120,120,.30);pointer-events:none;z-index:5}
+#fsb{position:fixed;top:10px;right:12px;z-index:10;background:transparent;
+  border:none;mix-blend-mode:difference;color:rgba(255,255,255,.55);font-size:17px;cursor:pointer}
+#cursor{position:fixed;width:7px;height:7px;border-radius:50%;
+  background:rgba(160,160,160,.5);transform:translate(-50%,-50%);
+  pointer-events:none;z-index:50;left:-50px;top:-50px}
+</style></head><body>
+<canvas id="field"></canvas>
+<div id="cap"></div>
+<button id="fsb" onclick="tfs()">⛶</button>
+<div id="cursor"></div>
 <script>
-/* Navegación por ordinal: ← → recorren las piezas (preestreno + vida). */
-document.addEventListener('keydown', function(e){
-  if(e.key!=='ArrowLeft' && e.key!=='ArrowRight') return;
-  var cur = (typeof currentCycle==='number' && currentCycle!==null) ? currentCycle : CLK.idxAt(Date.now());
-  var nk = Math.max(0, Math.min(CLK.count-1, cur + (e.key==='ArrowRight'?1:-1)));
-  if(nk!==cur && typeof generate==='function'){ generate(new Date(CLK.times[nk]+1000)); }
-});
+/* ─────────────────────────────────────────────────────────────
+   DEAR: WHITE
+   Un único blanco — el 255 de la pantalla, la luz emitida.
+   Sin forma. Su arquitectura es el tiempo: habita el tiempo de Dear:.
+   Su presencia luminosa es la fase continua del número lento (N3,
+   "Cage") de Dear: Time — ciclo ~16 meses, onda simétrica
+   brasa→plenitud→brasa, tan lenta que no se percibe transcurrir.
+   Bebe del MISMO reloj que Time: mismo BIRTH, mismo hash, mismo
+   mulberry32, misma fórmula de período. White y Time son dos caras
+   del único tiempo de Dear: — número (Time) y duración (White).
+   ───────────────────────────────────────────────────────────── */
+
+// ── Núcleo canónico (idéntico a Dear: Time) ──────────────────
+const BIRTH = new Date(2026, 5, 22, 0,0,0,0);   // Big Bang: 22 jun 2026, 00:00
+const MONTH_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+function hashString(str){
+  let h = 2166136261 >>> 0;
+  for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h,16777619); }
+  return h >>> 0;
+}
+function formatDateSeed(d){ return MONTH_ABBR[d.getMonth()]+"."+d.getDate()+"."+d.getFullYear(); }
+function seedFromDate(d){ return hashString(formatDateSeed(d)); }
+function mulberry32(seed){
+  let a = seed >>> 0;
+  return function(){
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function getPermutations(arr){
+  if(arr.length<=1) return [arr];
+  const res=[];
+  for(let i=0;i<arr.length;i++){
+    const c=arr[i], rem=arr.slice(0,i).concat(arr.slice(i+1));
+    for(const p of getPermutations(rem)) res.push([c].concat(p));
+  }
+  return res;
+}
+const ALL_PERMS = getPermutations([1,2,3,4,5]);
+const PERM_STRINGS = ALL_PERMS.map(p=>p.join(','));
+function lehmerRank(p){
+  const FACT=[1,1,2,6,24,120]; const a=p.slice(); let rank=0; const n=a.length;
+  const elems=[...a].sort((x,y)=>x-y);
+  for(let i=0;i<n;i++){
+    const pos=elems.indexOf(a[i]); rank+=pos*FACT[n-1-i]; elems.splice(pos,1);
+  }
+  return rank;
+}
+function pickPerms(date, n){
+  const rng = mulberry32(seedFromDate(date));
+  const idx=[], used=new Set();
+  while(idx.length<n){
+    const i = Math.floor(rng()*PERM_STRINGS.length);
+    if(!used.has(i)){ used.add(i); idx.push(i); }
+  }
+  return idx.map(i => PERM_STRINGS[i].split(',').map(Number));
+}
+const K = 5;
+function buildNumbers(date){
+  return pickPerms(date,5).map(perm=>{
+    const lr = lehmerRank(perm);
+    const period = Math.pow(2,(119-lr)/K);   // segundos por paso
+    return { perm, period, lr };
+  });
+}
+
+// ── El número lento (N3, el de Cage) ─────────────────────────
+// Es el de período mayor (rank menor). Lo hallamos por el sistema,
+// no a mano: el de mayor 'period' entre los cinco del día natal.
+const NUMBERS = buildNumbers(BIRTH);
+let SLOW = NUMBERS[0];
+for(const nb of NUMBERS) if(nb.period > SLOW.period) SLOW = nb;
+const CYCLE = SLOW.period * 5;   // ciclo completo (5 posiciones) en segundos
+
+// ── Tiempo desde el Big Bang ─────────────────────────────────
+function elapsedSeconds(){ return (Date.now() - BIRTH.getTime())/1000; }
+
+// ── La luz: fase continua → onda simétrica → brasa..plenitud ──
+const BRASA = 0.3005;        // mínimo de luz: rgb 149 en el punto más lejano del ciclo
+                              // (penumbra alta, luz en reposo; nunca cerca del negro)
+// percepción: la onda es simétrica PARA EL OJO (corrección gamma sRGB)
+function srgbEncode(lin){    // lineal (0..1) → valor sRGB (0..1)
+  return lin <= 0.0031308 ? 12.92*lin : 1.055*Math.pow(lin,1/2.4)-0.055;
+}
+function lightAt(elapsed){
+  const phase = ((elapsed / SLOW.period) % 5) / 5;        // 0..1 continuo
+  // Nace en ESPLENDOR: plenitud en el Big Bang (fase 0), desciende a la
+  // brasa a mitad de ciclo, vuelve a la plenitud al cerrar. Sin saltos.
+  const wave  = (1 + Math.cos(2*Math.PI*phase)) / 2;       // 1 en nacimiento, 0 a mitad
+  const lin   = BRASA + (1.0 - BRASA) * wave;              // luz lineal en [brasa,1]
+  return srgbEncode(lin);                                   // a sRGB para el ojo
+}
+
+// ── Render: el campo entero ES la luz ────────────────────────
+const cv = document.getElementById('field');
+const ctx = cv.getContext('2d',{alpha:false});
+let DPR = Math.max(1, window.devicePixelRatio||1);
+function resize(){
+  const W=window.innerWidth,H=window.innerHeight;
+  cv.width=Math.floor(W*DPR); cv.height=Math.floor(H*DPR);
+  cv.style.width=W+'px'; cv.style.height=H+'px';
+}
+function render(){
+  const e = elapsedSeconds();
+  let v;
+  if(e < 0){ v = 0; }                       // antes del Big Bang: oscuridad
+  else { v = Math.round(lightAt(e)*255); }   // el único blanco, a su presencia de hoy
+  ctx.fillStyle = `rgb(${v},${v},${v})`;
+  ctx.fillRect(0,0,cv.width,cv.height);
+  requestAnimationFrame(render);
+}
+resize(); render();
+window.addEventListener('resize',()=>{DPR=Math.max(1,window.devicePixelRatio||1);resize();});
+
+// ── Cursor propio ────────────────────────────────────────────
+const cur=document.getElementById('cursor');
+window.addEventListener('pointermove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+
+// ── Pantalla completa ────────────────────────────────────────
+function tfs(){
+  const d=document, el=d.documentElement;
+  const fs=d.fullscreenElement||d.webkitFullscreenElement;
+  if(!fs){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el); }
+  else { (d.exitFullscreen||d.webkitExitFullscreen).call(d); }
+}
 </script>
-
-<button id="clkFS" title="fullscreen" onclick="(function(){var d=document,el=d.documentElement;var f=d.fullscreenElement||d.webkitFullscreenElement;if(!f){(el.requestFullscreen||el.webkitRequestFullscreen).call(el);}else{(d.exitFullscreen||d.webkitExitFullscreen).call(d);}})()" style="position:fixed;top:10px;right:12px;z-index:60;background:transparent;border:none;mix-blend-mode:difference;color:rgba(255,255,255,.6);font-size:17px;cursor:pointer;">⛶</button>
-
-
-<style>#dateInput,#todayButton,label[for="dateInput"]{display:none !important}
-.clknav{position:fixed;bottom:14px;right:14px;z-index:70;mix-blend-mode:difference;display:flex;gap:6px}
-.clknav button{background:transparent;border:1px solid rgba(255,255,255,.45);color:rgba(255,255,255,.75);
-font-size:16px;line-height:1;padding:6px 12px;border-radius:6px;cursor:pointer}</style>
-<div class="clknav"><button onclick="CLKNAV(-1)">&#8249;</button><button onclick="CLKNAV(1)">&#8250;</button></div>
-<script>function CLKNAV(d){var c=(typeof window.CLK_CUR==='number')?window.CLK_CUR:CLK.idxAt(Date.now());
-var k=Math.max(0,Math.min(CLK.count-1,c+d)); if(k===c)return;
-if(typeof generate==='function'){generate(new Date(CLK.times[k]+1000));}
-else{var i=document.getElementById('dateInput');var dt=new Date(CLK.times[k]+1000);
-if(i){i.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
-if(typeof onDateChange==='function')onDateChange();}}</script>
-</body>
-</html>
+</body></html>
