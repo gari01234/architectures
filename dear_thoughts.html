@@ -1290,7 +1290,7 @@ function rebuildSceneColours(){
 
       // Actualizar HUD y document.title con la fecha del ciclo activo
       // (formato Kawara: MMM.DD.YYYY).
-      const cycleLabel = 'piece ' + CLK.ord(kIdx) + ' · ' + formatKawara(cycleStart);
+      const cycleLabel = 'piece ' + CLK.ord(kIdx) + (CLK.ord(kIdx) <= 0 ? ' (prenatal)' : '') + ' · ' + formatKawara(cycleStart);
       const titleEl = document.getElementById('pieceTitle');
       if (titleEl) titleEl.textContent = "Dear: Thoughts — " + cycleLabel;
       document.title = "Dear: Thoughts — " + cycleLabel;
@@ -2329,15 +2329,22 @@ document.addEventListener('keydown', function(e){
 </script>
 
 <style>#dateInput,#todayButton,label[for="dateInput"]{display:none !important}
-.clknav{position:fixed;bottom:14px;right:14px;z-index:70;mix-blend-mode:difference;display:flex;gap:6px}
-.clknav button{background:transparent;border:1px solid rgba(255,255,255,.45);color:rgba(255,255,255,.75);
-font-size:16px;line-height:1;padding:6px 12px;border-radius:6px;cursor:pointer}</style>
-<div class="clknav"><button onclick="CLKNAV(-1)">&#8249;</button><button onclick="CLKNAV(1)">&#8250;</button></div>
+#clkArrows span{cursor:pointer;transition:color .2s}
+#clkArrows span:hover{color:rgba(0,0,0,.75)}
+.isfs #pieceTitle,.isfs #pieceTitle,.isfs #clkArrows,.isfs #clkFS,.isfs #toggleUIButton,.isfs #fullscreenButton,.isfs #permNextButton,.isfs #toggleTextButton,.isfs #fsb{display:none !important}</style>
+<div id="clkArrows" style="position:fixed;bottom:16px;left:18px;z-index:99999;display:flex;gap:26px;font:24px/1 Georgia,serif;color:rgba(0,0,0,.35);user-select:none">
+<span onclick="CLKNAV(-1)">&#8249;</span><span onclick="CLKNAV(1)">&#8250;</span></div>
 <script>function CLKNAV(d){var c=(typeof window.CLK_CUR==='number')?window.CLK_CUR:CLK.idxAt(Date.now());
-var k=Math.max(0,Math.min(CLK.count-1,c+d)); if(k===c)return;
-if(typeof generate==='function'){generate(new Date(CLK.times[k]+1000));}
-else{var i=document.getElementById('dateInput');var dt=new Date(CLK.times[k]+1000);
-if(i){i.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
-if(typeof onDateChange==='function')onDateChange();}}</script>
+var k=Math.max(0,Math.min(CLK.count-1,c+d)); if(k===c)return; generateCycleScene(new Date(CLK.times[k]+1000));}
+(function(){function fs(){var f=document.fullscreenElement||document.webkitFullscreenElement;
+document.body.classList.toggle('isfs',!!f);}
+document.addEventListener('fullscreenchange',fs);document.addEventListener('webkitfullscreenchange',fs);})();</script>
+
+<style>
+#toggleTextButton{position:fixed !important;top:10px !important;left:12px !important;bottom:auto !important;right:auto !important}
+#fullscreenButton{position:fixed !important;top:auto !important;bottom:14px !important;right:14px !important;left:auto !important}
+#permNextButton{position:fixed !important;top:10px !important;right:12px !important;bottom:auto !important;left:auto !important}
+.clknav{left:14px !important;right:auto !important}
+</style>
 </body>
 </html>
