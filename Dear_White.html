@@ -149,4 +149,11 @@ function tfs(){
   else { (d.exitFullscreen||d.webkitExitFullscreen).call(d); }
 }
 </script>
+
+<style>#fsb{top:auto !important;bottom:14px !important;right:14px !important;cursor:pointer !important}</style>
+
+<style>.isfs #fsb{display:none !important}</style>
+<script>(function(){function fs(){var f=document.fullscreenElement||document.webkitFullscreenElement;
+document.body.classList.toggle('isfs',!!f);}
+document.addEventListener('fullscreenchange',fs);document.addEventListener('webkitfullscreenchange',fs);})();</script>
 </body></html>
