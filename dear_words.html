@@ -403,7 +403,7 @@
     //   La fecha-semilla del ciclo K es EPOCH + K*5 días.
     function cycleNumberOf(date) {
       // El reloj decide: índice de la época vigente en esa fecha.
-      return CLK.idxAt(date.getTime());
+      const _i = CLK.idxAt(date.getTime()); window.CLK_CUR = _i; return _i;
     }
 
     function cycleStartDate(k) {
@@ -850,8 +850,8 @@
       const offset = offsetForCycle(k);
       currentWords = words;
 
-      pieceTitleEl.textContent = "Dear: Words — " + seed;
-      document.title = "Dear: Words — " + seed;
+      pieceTitleEl.textContent = "Dear: Words — " + ('piece ' + CLK.ord(window.CLK_CUR||0) + ((CLK.ord(window.CLK_CUR||0))<=0?' (prenatal)':'') + ' · ' + formatDateSeed(cycleStartDate(window.CLK_CUR||0)));
+      document.title = "Dear: Words — " + ('piece ' + CLK.ord(window.CLK_CUR||0) + ((CLK.ord(window.CLK_CUR||0))<=0?' (prenatal)':'') + ' · ' + formatDateSeed(cycleStartDate(window.CLK_CUR||0)));
 
       drawField(k);
       renderStats(k, seed, words, offset);
@@ -991,7 +991,19 @@ document.addEventListener('keydown', function(e){
 });
 </script>
 
-<button id="clkFS" title="fullscreen" onclick="(function(){var d=document,el=d.documentElement;var f=d.fullscreenElement||d.webkitFullscreenElement;if(!f){(el.requestFullscreen||el.webkitRequestFullscreen).call(el);}else{(d.exitFullscreen||d.webkitExitFullscreen).call(d);}})()" style="position:fixed;top:10px;right:12px;z-index:60;background:transparent;border:none;color:rgba(140,140,140,.35);font-size:17px;cursor:pointer;">⛶</button>
+<button id="clkFS" title="fullscreen" onclick="(function(){var d=document,el=d.documentElement;var f=d.fullscreenElement||d.webkitFullscreenElement;if(!f){(el.requestFullscreen||el.webkitRequestFullscreen).call(el);}else{(d.exitFullscreen||d.webkitExitFullscreen).call(d);}})()" style="position:fixed;top:10px;right:12px;z-index:60;background:transparent;border:none;mix-blend-mode:difference;color:rgba(255,255,255,.6);font-size:17px;cursor:pointer;">⛶</button>
 
+
+<style>#dateInput,#todayButton,label[for="dateInput"]{display:none !important}
+.clknav{position:fixed;bottom:14px;right:14px;z-index:70;mix-blend-mode:difference;display:flex;gap:6px}
+.clknav button{background:transparent;border:1px solid rgba(255,255,255,.45);color:rgba(255,255,255,.75);
+font-size:16px;line-height:1;padding:6px 12px;border-radius:6px;cursor:pointer}</style>
+<div class="clknav"><button onclick="CLKNAV(-1)">&#8249;</button><button onclick="CLKNAV(1)">&#8250;</button></div>
+<script>function CLKNAV(d){var c=(typeof window.CLK_CUR==='number')?window.CLK_CUR:CLK.idxAt(Date.now());
+var k=Math.max(0,Math.min(CLK.count-1,c+d)); if(k===c)return;
+if(typeof generate==='function'){generate(new Date(CLK.times[k]+1000));}
+else{var i=document.getElementById('dateInput');var dt=new Date(CLK.times[k]+1000);
+if(i){i.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
+if(typeof onDateChange==='function')onDateChange();}}</script>
 </body>
 </html>
