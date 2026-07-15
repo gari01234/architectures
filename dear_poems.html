@@ -1086,6 +1086,7 @@
     //   El número de cuartos también deriva determinísticamente
     //   de la fecha. No hay control manual.
     function generate(date) {
+      window.CLK_GO = generate; window.CLK_REF = CLK;
       currentDate = date;
       const kIdx = CLK.idxAt(date.getTime()); window.CLK_CUR = kIdx;
       const seed = CLK.seedStr(kIdx);   // genoma + '#' + ordinal
@@ -1387,15 +1388,23 @@ document.addEventListener('keydown', function(e){
 <button id="clkFS" title="fullscreen" onclick="(function(){var d=document,el=d.documentElement;var f=d.fullscreenElement||d.webkitFullscreenElement;if(!f){(el.requestFullscreen||el.webkitRequestFullscreen).call(el);}else{(d.exitFullscreen||d.webkitExitFullscreen).call(d);}})()" style="position:fixed;top:10px;right:12px;z-index:60;background:transparent;border:none;mix-blend-mode:difference;color:rgba(255,255,255,.6);font-size:17px;cursor:pointer;">⛶</button>
 
 <style>#dateInput,#todayButton,label[for="dateInput"]{display:none !important}
-.clknav{position:fixed;bottom:14px;right:14px;z-index:70;mix-blend-mode:difference;display:flex;gap:6px}
-.clknav button{background:transparent;border:1px solid rgba(255,255,255,.45);color:rgba(255,255,255,.75);
-font-size:16px;line-height:1;padding:6px 12px;border-radius:6px;cursor:pointer}</style>
-<div class="clknav"><button onclick="CLKNAV(-1)">&#8249;</button><button onclick="CLKNAV(1)">&#8250;</button></div>
-<script>function CLKNAV(d){var c=(typeof window.CLK_CUR==='number')?window.CLK_CUR:CLK.idxAt(Date.now());
-var k=Math.max(0,Math.min(CLK.count-1,c+d)); if(k===c)return;
-if(typeof generate==='function'){generate(new Date(CLK.times[k]+1000));}
-else{var i=document.getElementById('dateInput');var dt=new Date(CLK.times[k]+1000);
-if(i){i.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
-if(typeof onDateChange==='function')onDateChange();}}</script>
+#clkArrows span{cursor:pointer;transition:color .2s}
+#clkArrows span:hover{color:rgba(0,0,0,.75)}
+.isfs #pieceTitle,.isfs #clkArrows,.isfs #clkFS,.isfs #toggleUIButton,.isfs #fullscreenButton,.isfs #permNextButton,.isfs #toggleTextButton,.isfs #fsb{display:none !important}</style>
+<div id="clkArrows" style="position:fixed;bottom:16px;left:18px;z-index:99999;display:flex;gap:26px;font:24px/1 Georgia,serif;color:rgba(0,0,0,.35);user-select:none">
+<span onclick="CLKNAV(-1)">&#8249;</span><span onclick="CLKNAV(1)">&#8250;</span></div>
+<script>function CLKNAV(d){var C=window.CLK_REF||((typeof CLK!=='undefined')?CLK:null);if(!C)return;
+var c=(typeof window.CLK_CUR==='number')?window.CLK_CUR:C.idxAt(Date.now());
+var k=Math.max(0,Math.min(C.count-1,c+d)); if(k===c)return;
+var go=window.CLK_GO||((typeof generate==='function')?generate:null); if(go)go(new Date(C.times[k]+1000));}
+(function(){function fs(){var f=document.fullscreenElement||document.webkitFullscreenElement;
+document.body.classList.toggle('isfs',!!f);}
+document.addEventListener('fullscreenchange',fs);document.addEventListener('webkitfullscreenchange',fs);})();</script>
+
+<style>
+#toggleUIButton{position:fixed !important;top:10px !important;left:12px !important;bottom:auto !important;right:auto !important}
+#clkFS{top:auto !important;bottom:14px !important;right:14px !important}
+.clknav{left:14px !important;right:auto !important}
+</style>
 </body>
 </html>
