@@ -1972,7 +1972,8 @@ function layoutLeftControlsPanel(){
         document.getElementById('standardView').value=p.get('view');
         applyStandardView();
       }
-      if(p.get('hide')==='1') toggleTexts();
+      // hide=1 must not toggle twice at startup.
+       if(p.get('hide')==='1' && textsVisible) toggleTexts();
     }
  
 function exportCurrentConfiguration(){
@@ -2120,26 +2121,39 @@ function exportCurrentConfiguration(){
         dateInput.addEventListener('change', onDateChange);
       }
       generateCycleScene(today);
-      toggleTexts();
-      animate();
+      // The visible controls have one well-defined initial state.
+      if(textsVisible) toggleTexts();
+      animate(performance.now());
     }
     function onWindowResize(){
       camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth,window.innerHeight);
       layoutLeftControlsPanel();
     }
-    function animate(){
-  requestAnimationFrame(animate);
- 
-  if (!isPaused){
-    permutationGroup.children.forEach(o=>{
-      if (o.userData && o.userData.rotationSpeed) o.rotation.y += o.userData.rotationSpeed;
+    // Retain the nominal 60 Hz angular speed without tying it to rendered frames.
+    let animationFrameId=0, lastAnimationAt=null;
+    document.addEventListener('visibilitychange',()=>{
+      lastAnimationAt=null;
+      if(!document.hidden&&!animationFrameId)animationFrameId=requestAnimationFrame(animate);
     });
-  }
- 
-  if (controls) controls.update();
-  renderer.render(scene, camera);
-}
+    function animate(timestamp){
+      animationFrameId=0;
+      if(document.hidden){lastAnimationAt=null;return;}
+      animationFrameId=requestAnimationFrame(animate);
+      const now=Number.isFinite(timestamp)?timestamp:performance.now();
+      // No accumulated offscreen rotation or excessive jump on frame recovery.
+      const elapsedMs=lastAnimationAt===null?0:Math.min(100,Math.max(0,now-lastAnimationAt));
+      lastAnimationAt=now;
+      const frameScale=elapsedMs/(1000/60);
+      if(!isPaused&&frameScale>0){
+        permutationGroup.children.forEach(o=>{
+          if(o.userData&&o.userData.rotationSpeed)
+            o.rotation.y+=o.userData.rotationSpeed*frameScale;
+        });
+      }
+      if(controls)controls.update();
+      renderer.render(scene,camera);
+    }
  
  
  
