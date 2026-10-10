@@ -438,7 +438,7 @@
     //   Para determinar qué palabras ocupan el ciclo K, necesitamos
     //   el offset = N(0) + N(1) + ... + N(K-1).
     //   Cacheamos para evitar recálculo.
-    const offsetCache = { 0: 0 };  // offset al inicio del ciclo 0 = 0
+    const offsetCache = {};
     const sizeCache = {};
  
     function wordsCountForCycle(k) {
@@ -449,24 +449,40 @@
       return n;
     }
  
+    // ── El nacimiento reinicia la lectura del diccionario ───────────
+    //
+    //   La vida de la obra empieza con el diccionario intacto: la
+    //   primera pieza viva (ordinal 1) lee desde la posición 0 del
+    //   orden único, y cada pieza viva continúa donde terminó la
+    //   anterior. Ninguna palabra se repite en la vida de la obra.
+    //
+    //   Las piezas prenatales (ordinal <= 0) no consumen de ese
+    //   recorrido: se calculan hacia atrás desde el nacimiento, igual
+    //   que el reloj calcula su temporada proléptica, y leen el
+    //   diccionario desde su final. La pieza 0 termina en la última
+    //   palabra del orden; la −1 termina donde empieza la 0; etc.
     function offsetForCycle(k) {
       if (offsetCache[k] !== undefined) return offsetCache[k];
-      // Calcular acumulado desde el último cache conocido
-      let lastKnown = k - 1;
-      while (lastKnown >= 0 && offsetCache[lastKnown] === undefined) lastKnown--;
-      let acc = offsetCache[lastKnown];
-      for (let j = lastKnown; j < k; j++) {
-        acc += wordsCountForCycle(j);
-        offsetCache[j + 1] = acc;
-      }
-      return offsetCache[k];
+      const birth = CLK.preCount;          // índice de la primera pieza viva
+      let acc = 0;
+      if (k >= birth) { for (let j = birth; j < k; j++) acc += wordsCountForCycle(j); }
+      else            { for (let j = k; j < birth; j++) acc -= wordsCountForCycle(j); }
+      offsetCache[k] = acc;
+      return acc;
     }
- 
+
     function wordsForCycle(k) {
       const n = wordsCountForCycle(k);
       const offset = offsetForCycle(k);
+      const L = DICT_ORDERED.length;
+      if (offset < 0) {                    // prenatal: lectura desde el final
+        const start = ((offset % L) + L) % L;
+        const out = [];
+        for (let t = 0; t < n; t++) out.push(DICT_ORDERED[(start + t) % L]);
+        return out;
+      }
       // Si excedemos el diccionario, recortamos (final del proyecto).
-      const end = Math.min(offset + n, DICT_ORDERED.length);
+      const end = Math.min(offset + n, L);
       return DICT_ORDERED.slice(offset, end);
     }
  
@@ -837,8 +853,13 @@
       lines.push('<div><span class="k">until</span>' + (k < CLK.count - 1 ? formatDateSeed(new Date(CLK.times[k+1])) : 'now') + '</div>');
       lines.push('<div><span class="k">seed</span>' + seed + '</div>');
       lines.push('<div><span class="k">words</span>' + words.length + '</div>');
-      lines.push('<div><span class="k">consumed</span>' + (offset + words.length) + ' / ' + DICT_ORDERED.length + '</div>');
-      lines.push('<div><span class="k">remaining</span>' + (DICT_ORDERED.length - offset - words.length) + '</div>');
+      if (offset < 0) {
+        lines.push('<div><span class="k">consumed</span>0 / ' + DICT_ORDERED.length + ' (prenatal)</div>');
+        lines.push('<div><span class="k">remaining</span>' + DICT_ORDERED.length + '</div>');
+      } else {
+        lines.push('<div><span class="k">consumed</span>' + (offset + words.length) + ' / ' + DICT_ORDERED.length + '</div>');
+        lines.push('<div><span class="k">remaining</span>' + (DICT_ORDERED.length - offset - words.length) + '</div>');
+      }
       statsEl.innerHTML = lines.join("");
     }
  
