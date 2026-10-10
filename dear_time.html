@@ -269,5 +269,17 @@
     }catch(e){}
   }
   </script>
+<script>
+/* Pantalla completa: solo se ofrece donde el navegador la permite.
+   En iPhone (Safari) la API no existe para páginas; ahí el botón se oculta
+   y la vía es "Añadir a pantalla de inicio", que abre la obra sin barras. */
+(function(){var d=document;if(!(d.fullscreenEnabled||d.webkitFullscreenEnabled)){d.documentElement.classList.add('nofs');}})();
+</script>
+<style>.nofs #clkFS,.nofs #fullscreenButton,.nofs #fsb{display:none !important}</style>
+<style>
+/* En pantallas táctiles no hay puntero: el cursor propio se quedaría
+   inmóvil donde se tocó por última vez, encima de la obra. Se oculta. */
+@media (hover: none), (pointer: coarse){ #customCursor, #cursor{display:none !important} }
+</style>
 </body>
 </html>
