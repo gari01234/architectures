@@ -1,0 +1,25 @@
+name: Verify Thoughts
+on:
+  pull_request:
+    paths:
+      - 'dear_thoughts.html'
+      - 'tests/thoughts-embed.test.mjs'
+      - '.github/workflows/verify-thoughts.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'dear_thoughts.html'
+      - 'tests/thoughts-embed.test.mjs'
+      - '.github/workflows/verify-thoughts.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify canonical Thoughts source
+        run: node --test tests/thoughts-embed.test.mjs
