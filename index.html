@@ -16,75 +16,107 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 48px 24px;
+      min-height: 100%;
     }
 
     h1 {
       font-weight: 400;
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      color: rgba(0,0,0,0.32);
-      margin: 0 0 64px 0;
-      text-transform: none;
+      font-size: 13px;
+      letter-spacing: 0.20em;
+      color: rgba(0,0,0,0.38);
+      margin: 0 0 60px 0;
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
     }
 
     nav {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 15px;
       align-items: center;
+    }
+
+    nav .dear {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      letter-spacing: 0.20em;
+      color: rgba(0,0,0,0.38);
     }
 
     nav a {
       font-weight: 400;
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      color: rgba(0,0,0,0.55);
+      font-size: 13px;
+      letter-spacing: 0.20em;
+      color: rgba(0,0,0,0.60);
       text-decoration: none;
       transition: color 0.2s;
     }
-
     nav a:hover { color: #111111; }
 
-    /* La seña natal de Time: un susurro bajo su nombre, más tenue aún. */
-    .natal {
-      font-weight: 400;
-      font-size: 8px;
-      letter-spacing: 0.18em;
-      color: rgba(0,0,0,0.22);
-      margin-top: 3px;
+    /* ── Calendario: el horario de las piezas que vienen ──
+       La obra no muestra el futuro; el calendario sí: arqueología
+       en las obras, previsión solo aquí. */
+    #calendar {
+      margin-top: 64px;
+      width: 100%;
+      max-width: 440px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      padding-top: 22px;
     }
-    nav .time-entry {
+    #calendar .cal-head {
+      font-size: 9px;
+      letter-spacing: 0.24em;
+      color: rgba(0,0,0,0.28);
+      text-align: center;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+    #calendar .cal-row {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 5px 0;
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      color: rgba(0,0,0,0.55);
+    }
+    #calendar .cal-row .obra {
+      color: rgba(0,0,0,0.75);
+      letter-spacing: 0.14em;
+      white-space: nowrap;
+    }
+    #calendar .cal-row .when {
+      text-align: right;
+      color: rgba(0,0,0,0.45);
+      white-space: nowrap;
+    }
+    #calendar .cal-row .n {
+      color: rgba(0,0,0,0.30);
+      font-size: 9px;
+    }
+    #calendar .cal-empty {
+      text-align:center; font-size:10px; letter-spacing:.14em;
+      color: rgba(0,0,0,0.30);
     }
 
     footer {
       position: fixed;
-      bottom: 24px;
-      left: 0;
-      right: 0;
+      bottom: 20px;
+      left: 0; right: 0;
       text-align: center;
-      font-weight: 400;
       font-size: 10px;
       letter-spacing: 0.18em;
-      color: rgba(0,0,0,0.32);
+      color: rgba(0,0,0,0.30);
     }
   </style>
 </head>
 <body>
-  <h1>
-    <span class="system">Architectures</span>
-  </h1>
+  <h1>Architectures</h1>
 
   <nav>
-    <span class="dear" style="display:block;margin-bottom:6px;">Dear:</span>
+    <span class="dear">Dear:</span>
     <a href="dear_thoughts.html">Thoughts</a>
     <a href="dear_poems.html">Poems</a>
     <a href="dear_words.html">Words</a>
@@ -93,6 +125,87 @@
     <a href="dear_time.html">Time</a>
   </nav>
 
+  <section id="calendar">
+    <div class="cal-head">pr&oacute;ximas piezas</div>
+    <div id="calBody"></div>
+  </section>
+
   <footer>t&#8320; JUN.22.2026</footer>
+
+  <script>
+  /* ═══ Motor del calendario — mismo núcleo determinista que el reloj (CLK) ═══
+     El calendario computa las ráfagas venideras desde la semilla raíz del
+     sistema. No es una lista escrita a mano: nace del mismo cálculo que
+     engendra las piezas, y se actualiza solo conforme pasan las temporadas. */
+  (function(){
+    function chash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+    function crng(seed){let a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+    function cperms(arr){if(arr.length<=1)return[arr];const out=[];for(let i=0;i<arr.length;i++){const c=arr[i],rest=arr.slice(0,i).concat(arr.slice(i+1));for(const p of cperms(rest))out.push([c].concat(p));}return out;}
+    const P120=cperms([1,2,3,4,5]);
+    function clehmer(p){const F=[1,1,2,6,24,120];let r=0;for(let i=0;i<p.length;i++){let c=0;for(let j=i+1;j<p.length;j++)if(p[j]<p[i])c++;r+=c*F[p.length-1-i];}return r;}
+    function firstPerm(seedStr){const g=crng(chash(seedStr));return P120[Math.floor(g()*120)];}
+    const BIRTH_MS=new Date(2026,5,22,0,0,0,0).getTime();
+    const natal=(function(){const g=crng(chash("JUN.22.2026"));const idx=[],u=new Set();while(idx.length<5){const i=Math.floor(g()*120);if(!u.has(i)){u.add(i);idx.push(i);}}return idx.map(i=>Math.pow(2,(119-clehmer(P120[i]))/5));})();
+    const PER=[natal[1],natal[2],natal[3],natal[4]];
+    function hand(t,per){const s=Math.floor(t/per);return((s%5)+5)%5+1;}
+    function epochsOf(genome,a,b){
+      const TGT=[genome[1],genome[2],genome[3],genome[4]];
+      let evts=[a];
+      for(const per of PER){let t=Math.ceil(a/per)*per;if(t<=a)t+=per;for(;t<=b;t+=per)evts.push(t);}
+      evts.sort((x,y)=>x-y);
+      const out=[];let inState=false;
+      for(let i=0;i<evts.length;i++){
+        const t=evts[i]+1e-3;
+        const ok=hand(t,PER[0])===TGT[0]&&hand(t,PER[1])===TGT[1]&&hand(t,PER[2])===TGT[2]&&hand(t,PER[3])===TGT[3];
+        if(ok&&!inState)out.push(evts[i]);
+        inState=ok;
+      }
+      return out;
+    }
+    function upcomingBursts(title,nowMs,horizonMs){
+      const g=firstPerm(title);
+      const a=(nowMs-BIRTH_MS)/1000, b=(horizonMs-BIRTH_MS)/1000;
+      const ts=epochsOf(g,a,b);
+      if(!ts.length) return [];
+      const groups=[[ts[0]]];
+      for(let i=1;i<ts.length;i++){ const last=groups[groups.length-1]; if(ts[i]-last[last.length-1]<1.5*86400) last.push(ts[i]); else groups.push([ts[i]]); }
+      return groups.map(gr=>({start:BIRTH_MS+gr[0]*1000, end:BIRTH_MS+gr[gr.length-1]*1000, n:gr.length}));
+    }
+
+    const MON=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+    function fmt(ms){const d=new Date(ms);return d.getDate()+" "+MON[d.getMonth()];}
+    function fmtRange(a,b){
+      const da=new Date(a), db=new Date(b);
+      if(da.getDate()===db.getDate() && da.getMonth()===db.getMonth())
+        return fmt(a)+" "+db.getFullYear();
+      if(da.getMonth()===db.getMonth())
+        return da.getDate()+"–"+db.getDate()+" "+MON[db.getMonth()]+" "+db.getFullYear();
+      return fmt(a)+" – "+fmt(b)+" "+db.getFullYear();
+    }
+
+    const OBRAS=[["Poems","Dear: Poems"],["Words","Dear: Words"],
+                 ["Letters","Dear: Letters"],["Thoughts","Dear: Thoughts"]];
+    const now=Date.now();
+    const horizon=now + 1000*60*60*24*430;
+    let rows=[];
+    OBRAS.forEach(function(o){
+      const bs=upcomingBursts(o[1],now,horizon).slice(0,2);
+      bs.forEach(function(b){ rows.push({obra:o[0], start:b.start, end:b.end, n:b.n}); });
+    });
+    rows.sort(function(x,y){return x.start-y.start;});
+
+    const body=document.getElementById('calBody');
+    if(!rows.length){
+      body.innerHTML='<div class="cal-empty">— temporada en reposo —</div>';
+    } else {
+      body.innerHTML = rows.map(function(r){
+        const piezas = r.n===1 ? '1 pieza' : r.n+' piezas';
+        return '<div class="cal-row"><span class="obra">'+r.obra.toUpperCase()+
+               '</span><span class="when">'+fmtRange(r.start,r.end)+
+               ' &nbsp;<span class="n">'+piezas+'</span></span></div>';
+      }).join('');
+    }
+  })();
+  </script>
 </body>
 </html>
