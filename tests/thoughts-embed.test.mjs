@@ -14,13 +14,19 @@ test('embedded hide=1 remains a clean scene without toggling twice',()=>{
   assert.match(src,/const ids = \[\s*'controls'/);
   assert.ok(src.includes("const miniBtns = ['permNextButton']"));
 });
-test('same rotation rule is normalized to elapsed visible time and never catches up after suspension',()=>{
-  assert.match(src,/const frameScale=elapsedMs\/\(1000\/60\)/);
-  assert.match(src,/o\.rotation\.y\+=o\.userData\.rotationSpeed\*frameScale/);
-  assert.match(src,/const elapsedMs=lastAnimationAt===null\?0:Math\.min\(100,Math\.max\(0,now-lastAnimationAt\)\)/);
-  assert.match(src,/if\(document\.hidden\)\{lastAnimationAt=null;return;\}/);
-  assert.match(src,/document\.addEventListener\('visibilitychange'/);
-  assert.ok(!src.includes('o.rotation.y += o.userData.rotationSpeed;'));
+test('the original per-frame rotation and animation lifecycle are preserved',()=>{
+  const start=src.indexOf('    function animate(){');
+  const end=src.indexOf('\n \n \n \n      init();',start);
+  assert.ok(start>=0&&end>start);
+  const body=src.slice(start,end);
+  assert.ok(body.includes('requestAnimationFrame(animate);'));
+  assert.ok(body.includes('if (!isPaused){'));
+  assert.ok(body.includes('o.rotation.y += o.userData.rotationSpeed;'));
+  assert.ok(body.includes('renderer.render(scene, camera);'));
+  assert.ok(src.includes('      animate();'));
+  assert.ok(!src.includes('frameScale'));
+  assert.ok(!src.includes('lastAnimationAt'));
+  assert.ok(!src.includes("document.addEventListener('visibilitychange'"));
 });
 test('canonical combinatorial engine remains present',()=>{
   assert.match(src,/const P120 = cperms\(\[1,2,3,4,5\]\)/);
